@@ -1,0 +1,1 @@
+https://github.com/Azure/azure-quickstart-templates/blob/master/quickstarts/microsoft.storage/storage-account-create/azuredeploy.parameters.json
