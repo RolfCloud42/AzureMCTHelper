@@ -1,8 +1,8 @@
 # AzureMCTHelper
 
-PowerShell script with WPF GUI for easy usage of Azure tasks during Microsoft trainings  
+PowerShell script with WPF GUI for easy usage of Azure tasks during Microsoft training.  
 
-![AzureMCTHelper main window](https://github.com/RolfCloud42/AzureMCTHelper/blob/main/media/docu_AzureMCTHelper_main_window.png)
+![Image of AzureMCTHelper main window](/media/docu_AzureMCTHelper_main_window.png)
 
 ## 1st things first
 
@@ -17,7 +17,7 @@ Place the script and its subfolders in any folder on your system. Make sure that
 
 There are two files in the folder "Resources". The settings.json and the tenants.csv. If you are intending to use the settings.json you can ignore the tenants.csv file. You can toggle between using the settings vs. the tenants file through the variable $script:UseSettingsJSON in the actual script file AzureMCTHelper.ps1.
 
-![settings.son file](https://github.com/RolfCloud42/AzureMCTHelper/blob/main/media/docu_settings_json.png)
+![screenshot of settings.json file](/media/docu_settings_json.png)
 
 The settings.json has three sections beside the version section:
 
@@ -27,7 +27,7 @@ The settings.json has three sections beside the version section:
 
 ### Defaults section
 
-In the defaults section you pre-configure values to become values of variables used in the script.
+In the defaults section, pre-configure values to become values of variables used in the script.
 
 In case you do not want to use the settings.json file you can set default values for the needed variables in the actual script file.
 These are the variables you need to fill with your own values:
@@ -48,13 +48,13 @@ These are the variables you need to fill with your own values:
 
 ### Tenants section
 
-In the tenants section you list the tenants name and IDs you want to authenticate against. Both values, Name and ID, are needed for a successful login.
+In the tenants section, list the tenants name and IDs you want to authenticate against. Both values, Name and ID, are needed for a successful login.
 The tenants section fills a dropdown list in the GUI. The script will not work properly without this information and you need at least one entry.
 
 ### Accounts section
 
-In this section you can list the user account names you want to use in your script. There will be no passwords stored.
-From your list you can pick one entry to become your default account by setting the value of the respective variable `$script:DefaultAccount` to its numbered place in the list.
+In this section, list the user account names you want to use in your script. There will be no passwords stored.
+From your list, pick one entry to become your default account by setting the value of the respective variable `$script:DefaultAccount` to its numbered place in the list.
 The DefaultAccount will be added to the login textbox, but you can always overwrite the value in the textbox during the runtime of the script.
 > Remember that the numbering starts with zero (0).
-This is an optional configuration and the script will work properly without this information unless you set a value of the variable `$script:DefaultAccount` and this value does not exist.
+This is an optional configuration and the script will work properly without this information unless the value of the variable `$script:DefaultAccount` is incorrect.
