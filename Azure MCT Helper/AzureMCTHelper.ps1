@@ -50,7 +50,7 @@ Add-Type -AssemblyName PresentationFramework # needed when starting the script f
     # all of these values can be configured within $ScriptFolder\Resources\settings.json
     if ($script:UseSettingsJSON -eq $false)
     {
-        $script:formCaption = 'Azure MCT Helper v0.7'
+        $script:formCaption = 'Azure MCT Helper v0.9'
         $script:workdir = "$ScriptFolder\Units"
         $script:SkipAzModuleStatus = $true
         $script:DefaultTenant = ""
@@ -58,7 +58,7 @@ Add-Type -AssemblyName PresentationFramework # needed when starting the script f
         $script:DefaultRegion = "northeurope"
         $script:DefaultRegionLong = "North Europe"
         $script:DefaultResourceGroup = "AzClass"
-        $script:DefaultAccount = ""
+        $script:DefaultAccount = "0"
 
         Write-Host "Settings loaded from script and tenants.csv..."
         $script:PreGUIMessages += "Settings loaded from script and tenants.csv..."
