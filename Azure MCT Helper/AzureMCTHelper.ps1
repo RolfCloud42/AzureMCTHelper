@@ -1,7 +1,5 @@
 ﻿Clear-Host
 Add-Type -AssemblyName PresentationFramework # needed when starting the script from the command line and not from the ISE
-#Add-Type -AssemblyName System
-
 #Requires -Version 5
 
 #region Generic_values
@@ -23,6 +21,7 @@ Add-Type -AssemblyName PresentationFramework # needed when starting the script f
     $script:SelectedSubscriptionID = $null
     
     $script:regions = $null
+    #$script:RegionsTable = @{}
     $script:SelectedRegionName = $null
     $script:SelectedRegionDisplayName = $null
     
@@ -47,30 +46,29 @@ Add-Type -AssemblyName PresentationFramework # needed when starting the script f
 #endregion Generic_values
 
 #region Settings
-    # all of these values can be configured within $ScriptFolder\Resources\settings.json
+    # all of these values can be configured within $Script:ScriptFolder\Resources\settings.json
     if ($script:UseSettingsJSON -eq $false)
     {
-        $script:formCaption = 'Azure MCT Helper v0.9'
-        $script:workdir = "$ScriptFolder\Units"
+        $script:formCaption = 'Azure MCT Helper v0.7'
+        $script:workdir = "$Script:ScriptFolder\Units"
         $script:SkipAzModuleStatus = $true
         $script:DefaultTenant = ""
         $script:DefaultSubscription = ""
         $script:DefaultRegion = "northeurope"
         $script:DefaultRegionLong = "North Europe"
         $script:DefaultResourceGroup = "AzClass"
-        $script:DefaultAccount = "0"
+        $script:DefaultAccount = ""
+        $script:DefaultEditor = "code"
 
         Write-Host "Settings loaded from script and tenants.csv..."
         $script:PreGUIMessages += "Settings loaded from script and tenants.csv..."
     }
 #endregion Settings
 
-#region functions
+#region Functions
 
 function Add-LogEntry {
     Param (
-        [ValidateNotNullOrEmpty()]
-        [string]$StatusMessage,
         [Parameter(Mandatory=$true)]
         [ValidateNotNullOrEmpty()]
         [array]$LogEntry,
@@ -80,7 +78,7 @@ function Add-LogEntry {
         $Severity
     )
 
-    $tbStatusMessage.Text = $StatusMessage
+    #$tbStatusMessage.Text = $StatusMessage
 
     If ([Array]$script:OldLogEntry -ne [Array]$LogEntry) {
     
@@ -148,7 +146,7 @@ function Add-Module ($module) {
         if (Get-Module -Name $module) {
             $Modulstate = $true 
             $logstring = "Module $module loaded"
-            Add-LogEntry -StatusMessage $logstring -LogEntry $logstring -Severity Info
+            Add-LogEntry -LogEntry $logstring -Severity Info
         }
         else {
             # If module is not imported, but available on disk then import
@@ -156,25 +154,25 @@ function Add-Module ($module) {
                 Import-Module -Name $module
                 $Modulstate = $true
                 $logstring = "Module $module imported"
-                Add-LogEntry -StatusMessage $logstring -LogEntry $logstring -Severity Info
+                Add-LogEntry -LogEntry $logstring -Severity Info
             }
             else {
                 # If module is not imported, not available on disk, but is in online gallery then install and import
                 if (Find-Module -Name $module) {
                     $logstring = "Module $module is not imported, not available on disk, but is in the online gallery. Installation and import will take a while"
-                    Add-LogEntry -StatusMessage $logstring -LogEntry $logstring -Severity Warning
+                    Add-LogEntry -LogEntry $logstring -Severity Warning
 
                     Install-Module -Name $module -Force -Scope CurrentUser -AllowClobber -Confirm:$False
                     Import-Module $module
                     $Modulstate = $true
                     $logstring = "Module $module installed and imported"
-                    Add-LogEntry -StatusMessage $logstring -LogEntry $logstring -Severity Info
+                    Add-LogEntry -LogEntry $logstring -Severity Info
                     
                 }
                 else {
                     # If module is not imported, not available and not in online gallery then abort
                     $logstring = "Module $module not imported, not available and not in online gallery, exiting advised."
-                    Add-LogEntry -StatusMessage $logstring -LogEntry $logstring -Severity Error
+                    Add-LogEntry -LogEntry $logstring -Severity Error
                 }
             }
         }
@@ -189,13 +187,27 @@ function Add-Module ($module) {
     }
 } # end function Add-Module
 
+function Find-AzureCLI {
+    $script:AzCliIsInstalled = $null
+    $script:AzCliIsInstalled = Get-ItemProperty HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\* | Where-Object {$_.DisplayName -Match "Microsoft Azure CLI"}
+
+    If ($script:AzCliIsInstalled) 
+    {
+        $tabAzureCLI.Visibility = "Visible"
+    }
+    else
+    {
+        $tabAzureCLI.Visibility = "Collapsed"
+    }
+} # end function Find-AzureCLI 
+
 function GetAMHSettings {
     if ($script:UseSettingsJSON -eq $true)
     {
         try
         {
-            if(Test-Path -Path "$ScriptFolder\Resources\settings.json") {
-                $script:settings = Get-Content -Path $ScriptFolder\Resources\settings.json | ConvertFrom-Json
+            if(Test-Path -Path "$Script:ScriptFolder\Resources\settings.json") {
+                $script:settings = Get-Content -Path $Script:ScriptFolder\Resources\settings.json | ConvertFrom-Json
                 Write-Host "Settings loaded from JSON..."
                 $script:PreGUIMessages += "Settings loaded from JSON..."
             }
@@ -212,7 +224,7 @@ function GetAMHSettings {
         }
 
         $script:formCaption = $script:Settings.defaults.formCaption
-        $script:workdir = Join-Path -path $scriptfolder -ChildPath $script:Settings.defaults.workdir
+        $script:workdir = Join-Path -path $Script:scriptfolder -ChildPath $script:Settings.defaults.workdir
         $script:SkipAzModuleStatus = $script:Settings.defaults.SkipAzModuleStatus
         $script:DefaultTenant = $script:Settings.defaults.DefaultTenant
         $script:DefaultSubscription = $script:Settings.defaults.DefaultSubscription
@@ -220,6 +232,7 @@ function GetAMHSettings {
         $script:DefaultRegionLong = $script:Settings.defaults.DefaultRegionLong
         $script:DefaultResourceGroup = $script:Settings.defaults.DefaultResourceGroup
         $script:DefaultAccount = $script:Settings.accounts[$script:Settings.defaults.DefaultAccount]
+        $script:DefaultEditor = $script:Settings.editors[$script:Settings.defaults.DefaultEditor]
     }
 } # end function GetAMHSettings
 
@@ -247,7 +260,7 @@ function FillTenantCB {
     }
     else
     {
-        $script:tenants = Import-CSV -LiteralPath $ScriptFolder\Resources\tenants.csv -Header Name,Tag
+        $script:tenants = Import-CSV -LiteralPath $Script:ScriptFolder\Resources\tenants.csv -Header Name,Tag
     }
 
     Foreach ($tenant in $script:tenants)
@@ -313,7 +326,7 @@ function FillSubscriptionCB {
         $script:SelectedSubscriptionName = $null
         $script:SelectedSubscriptionID = $null
         $logstring = "No subscriptions found in selected tenant"
-        Add-LogEntry -StatusMessage $logstring -LogEntry $logstring -Severity Info
+        Add-LogEntry -LogEntry $logstring -Severity Info
         $cbResourceGroup.IsEnabled = $false
         $script:SelectedRecourcegroupName = $null
         $cbResourceGroup.Text = "(New) Resource group"
@@ -344,6 +357,7 @@ function FillRegionCB {
             $RegionNewListBoxItem.Name = $region.Location
             $RegionNewListBoxItem.Content = $region.DisplayName
             $RegionNewListBoxItem.Tag = $region.Location
+            #$script:RegionsTable."$($region.Location)" = "$($region.DisplayName)" # needed for string replacement in scripts later
             $cbRegion.Items.Add($RegionNewListBoxItem) | Out-Null
         }
         If ($RegionNewListBoxItem.Name -eq $script:DefaultRegion)
@@ -385,7 +399,7 @@ function FillResourceGroupCB {
     else
     {
         $logstring = "No resource group(s) found in selected subscription"
-        Add-LogEntry -StatusMessage $logstring -LogEntry $logstring -Severity Info
+        Add-LogEntry -LogEntry $logstring -Severity Info
         $script:SelectedRecourcegroupName = $null
         $cbResourceGroup.Text = "(New) Resource group"
         RefreshUI
@@ -412,7 +426,7 @@ function FillUnitLB {
         $UnitNewListBoxItem.Name = "btnUnit$(($_.Name).Split("-")[0])"
         $ButtonName = $UnitNewListBoxItem.Name
         $UnitNewListBoxItem.Content = "$(($_.Name).Split("-")[1])"
-        $UnitNewListBoxItem.MinWidth = "200"
+        #$UnitNewListBoxItem.MinWidth = "200"
         $UnitNewListBoxItem.MinHeight = "30"
         $UnitNewListBoxItem.Padding = "5,1,5,2"
         $UnitNewListBoxItem.Margin = "0,5,0,3"
@@ -438,112 +452,154 @@ function FillUnitInfo {
 } # end function FillInitInfo
 
 function FillUnitTemplate {
+    $fdTemplate.Blocks.Clear()
     $script:azuredeployjson = $null
     $script:GitHubDeploymentJson = $false
-    if(Test-Path -Path $script:UnitFileDeploy)
+    if ($null -ne $script:UnitFileDeploy)
     {
-        $script:azuredeployjson = Get-Content -Path $script:UnitFileDeploy
-        If ($script:UnitFileDeploy -match 'github.txt')
+        if (Test-Path -Path $script:UnitFileDeploy)
         {
-            $RemoteJsonURL = (($script:azuredeployjson) -replace 'github.com','raw.githubusercontent.com') -replace 'blob/',''
-            $script:azuredeployjson = (New-Object System.Net.WebClient).DownloadString($RemoteJsonURL)
-            $script:GitHubDeploymentJson = $true
+            $script:azuredeployjson = Get-Content -Path $script:UnitFileDeploy
+            If ($script:UnitFileDeploy -match 'github.txt')
+            {
+                $RemoteJsonURL = (($script:azuredeployjson) -replace 'github.com','raw.githubusercontent.com') -replace 'blob/',''
+                $script:azuredeployjson = (New-Object System.Net.WebClient).DownloadString($RemoteJsonURL)
+                $script:GitHubDeploymentJson = $true
+            }
         }
-    }
-    else
-    {
-        $script:azuredeployjson = "No file to deploy with found in unit folder"
-    }
-
-    $fdTemplate.Blocks.Clear()
-    Foreach ($line in $script:azuredeployjson)
-    {
-        $pTemplate = New-Object -TypeName System.Windows.Documents.Paragraph
-        $pTemplate.Inlines.Add($line)
-        $fdTemplate.Blocks.Add($pTemplate)
+        else
+        {
+            $script:azuredeployjson = "No file to deploy with found in unit folder"
+        }
+        Foreach ($line in $script:azuredeployjson)
+        {
+            $pTemplate = New-Object -TypeName System.Windows.Documents.Paragraph
+            $pTemplate.Inlines.Add($line)
+            $fdTemplate.Blocks.Add($pTemplate)
+        }
     }
 } # end function FillUnitTemplate
 
 function FillUnitTemplateParameter {
+    $fdParameter.Blocks.Clear()
     $script:azuredeployparameter = $null
     $script:GitHubDeploymentParameter = $false
-    if(Test-Path -Path $script:UnitFileParameter)
+    if ($null -ne $script:UnitFileParameter)
     {
-        $script:azuredeployparameter = Get-Content -Path $script:UnitFileParameter
-        If ($script:UnitFileParameter -match 'github.txt')
+        if (Test-Path -Path $script:UnitFileParameter)
         {
-            $RemoteParameterJsonURL = (($script:azuredeployparameter) -replace 'github.com','raw.githubusercontent.com') -replace 'blob/',''
-            $script:azuredeployparameter = (New-Object System.Net.WebClient).DownloadString($RemoteParameterJsonURL)
-            $script:GitHubDeploymentParameter = $true
+            $script:azuredeployparameter = Get-Content -Path $script:UnitFileParameter
+            If ($script:UnitFileParameter -match 'github.txt')
+            {
+                $RemoteParameterJsonURL = (($script:azuredeployparameter) -replace 'github.com','raw.githubusercontent.com') -replace 'blob/',''
+                $script:azuredeployparameter = (New-Object System.Net.WebClient).DownloadString($RemoteParameterJsonURL)
+                $script:GitHubDeploymentParameter = $true
+            }
         }
-    }
-    else
-    {
-        $script:azuredeployparameter = "No file with parameters found in unit folder"
-    } 
-    $fdParameter.Blocks.Clear()
-    Foreach ($line in $script:azuredeployparameter)
-    {
-        $pParameter = New-Object -TypeName System.Windows.Documents.Paragraph
-        $pParameter.Inlines.Add($line)
-        $fdParameter.Blocks.Add($pParameter)
+        else
+        {
+            $script:azuredeployparameter = "No file with parameters found in unit folder"
+        }
+        Foreach ($line in $script:azuredeployparameter)
+        {
+            $pParameter = New-Object -TypeName System.Windows.Documents.Paragraph
+            $pParameter.Inlines.Add($line)
+            $fdParameter.Blocks.Add($pParameter)
+        }
     }
 } # end function FillUnitTemplateParameter
 
-function ReplaceScriptVariables ([string]$line2replace) {
-    [string]$line2return = $null
+function ReplaceScriptVariables ($script2replace) {
+    $script:script2return = $script2replace
     If ($null -ne $script:regions)
     {
-            $script:regions.GetEnumerator() | ForEach-Object {
-                if ($line2replace -match $_.Location)
-                {
-                    $line2return = $line2replace -replace $_.Location, $script:DefaultRegion
-                }
-                elseif ($line2replace -match $_.DisplayName)
-                {
-                    $line2return = $line2replace -replace $_.DisplayName, $script:DefaultRegionLong
-                }
+        #Foreach ($AzLocation in $script:RegionsTable) {
+        Foreach ($AzLocation in $script:Regions) {
+            If ($script2replace -match $AzLocation.DisplayName)
+            {
+                $script:script2return = $script2replace.replace($AzLocation.DisplayName, $script:DefaultRegionLong)
+                break
             }
+        }
+
+        #Foreach ($AzLocation in $script:RegionsTable) {
+        Foreach ($AzLocation in $script:Regions) {
+            If ($script2replace -match $AzLocation.Location)
+            {
+                $script:script2return = $script2replace.replace($AzLocation.Location, $script:DefaultRegion)
+                break
+            }
+        }    
     }
     else
     {
         $logstring = "Region list is not yet ready. Log in first."
-        Add-LogEntry -StatusMessage $logstring -LogEntry $logstring -Severity Warning
+        Add-LogEntry -LogEntry $logstring -Severity Warning
     }
-    return $line2return
+    return $script:script2return
 } # end function ReplaceScriptVariables
 
 function FillUnitPowerShell {
     $fdPowerShell.Blocks.Clear()
-    if(Test-Path -Path $script:UnitFileScript)
+    if ($null -ne $script:UnitFilePSScript)
     {
-        $azurescript = Get-Content -Path $script:UnitFileScript
-        $cbxVariableReplacement.IsEnabled = $true
-        $cbxVariableReplacement.Visibility = "Visible"
-        $lblVariableReplacement.Visibility = "Visible"
+        if (Test-Path -Path $script:UnitFilePSScript)
+        {
+            $azurescript = Get-Content -Path $script:UnitFilePSScript
+            ToggleReplaceVarCbx -tabname PS
+        }
+        else
+        {
+            $azurescript = "No file with the name azurescript.ps1 found in unit folder"
+        }
+
+        if ($cbxVariableReplacement.IsChecked)
+        {
+            $azurescript = ReplaceScriptVariables -script2replace $azurescript
+        }
+        #else
+        #{
+        #    $azurescript = $azurescript
+        #}
         Foreach ($line in $azurescript)
         {
-            if ($cbxVariableReplacement.IsChecked)
-            {
-                $modifiedline = ReplaceScriptVariables -line2replace $line
-            }
-            else
-            {
-                $modifiedline = $line
-            }
             $pScript = New-Object -TypeName System.Windows.Documents.Paragraph
-            $pScript.Inlines.Add($modifiedline)
+            $pScript.Inlines.Add($line)
             $fdPowerShell.Blocks.Add($pScript)
         }
     }
-    else
-    {
-        $azurescript = "No file with the name azurescript.ps1 found in unit folder"
-        $cbxVariableReplacement.Visibility = "Hidden"
-        $lblVariableReplacement.Visibility = "Hidden"
-        $cbxVariableReplacement.IsEnabled = $false
-    }
 } # end function FillUnitPowerShell
+
+function FillUnitAzureCLI {
+    $fdAzureCLI.Blocks.Clear()
+    if ($null -ne $script:UnitFileAZScript)
+    {
+        if (Test-Path -Path $script:UnitFileAZScript)
+        {
+            $azurescript = Get-Content -Path $script:UnitFileAZScript
+            ToggleReplaceVarCbx -tabname CLI
+        }
+        else
+        {
+            $azurescript = "No file with the name azurescript.sh found in unit folder"
+        }
+
+        if ($cbxVariableReplacement.IsChecked)
+        {
+            $azurescript = ReplaceScriptVariables -script2replace $azurescript
+        }
+        #else
+        #{
+        #    $azurescript = $azurescript
+        #}
+        Foreach ($line in $azurescript)
+        {
+            $aScript = New-Object -TypeName System.Windows.Documents.Paragraph
+            $aScript.Inlines.Add($line)
+            $fdAzureCLI.Blocks.Add($aScript)
+        }
+    }
+} # end function FillUnitAzureCLI 
 
 function ActivateActionPane ($UnitName,$UnitFolder) {
     $script:SelectedUnit = $UnitName
@@ -568,14 +624,54 @@ function ActivateActionPane ($UnitName,$UnitFolder) {
         $script:UnitFileParameter = "$script:SelectedUnitFolder\azuredeploy.parameters.json.github.txt"
     }
     
-    $script:UnitFileScript = "$script:SelectedUnitFolder\azurescript.ps1"
+    $script:UnitFilePSScript = "$script:SelectedUnitFolder\azurescript.ps1"
+
+    $script:UnitFileAZScript = "$script:SelectedUnitFolder\azurescript.sh"
     
     FillUnitInfo
     FillUnitTemplate
     FillUnitTemplateParameter
     FillUnitPowerShell
+    FillUnitAzureCLI
     ToggleDeployButtons
 } # end function ActivateActionPane
+
+function ToggleReplaceVarCbx ($tabname) { # needs work
+
+    switch ($tabname)
+    {
+    'PS' {
+            if (($null -ne $script:SelectedUnit) -and (Test-Path -Path $script:UnitFilePSScript))
+            {
+                $cbxVariableReplacement.IsEnabled = $true
+                $cbxVariableReplacement.Visibility = "Visible"
+                $lblVariableReplacement.Visibility = "Visible"
+            }
+            else
+            {
+                $cbxVariableReplacement.Visibility = "Hidden"
+                $lblVariableReplacement.Visibility = "Hidden"
+                $cbxVariableReplacement.IsEnabled = $false
+            }
+        }
+    'CLI' {
+            if (($null -ne $script:SelectedUnit) -and (Test-Path -Path $script:UnitFileAZScript))
+            {
+                $cbxVariableReplacement.IsEnabled = $true
+                $cbxVariableReplacement.Visibility = "Visible"
+                $lblVariableReplacement.Visibility = "Visible"
+            }
+            else
+            {
+                $cbxVariableReplacement.Visibility = "Hidden"
+                $lblVariableReplacement.Visibility = "Hidden"
+                $cbxVariableReplacement.IsEnabled = $false
+            }
+        }
+    
+    }
+
+} # end function ToggleReplaceVarCbx
 
 function ToggleDeployButtons ($Toggle) {
     If ($Toggle -eq "off")
@@ -586,8 +682,10 @@ function ToggleDeployButtons ($Toggle) {
         $imgScriptInactive.Visibility = "Hidden"
     }
 
-    if (($null -ne $script:SelectedUnit) -and (Test-Path -Path $script:UnitFileDeploy))
+    if ($null -ne $script:UnitFileDeploy)
     {
+        if (($null -ne $script:SelectedUnit) -and (Test-Path -Path $script:UnitFileDeploy))
+        {
         if ($script:logedin -eq $true)
         {
             $imgDeployActive.Visibility = "Visible"
@@ -599,30 +697,35 @@ function ToggleDeployButtons ($Toggle) {
             $imgDeployInactive.Visibility = "Visible"
         }
     }
-    else
-    {
+        else
+        {
         $imgDeployActive.Visibility = "Hidden"
         $imgDeployInactive.Visibility = "Hidden"
     }
+    }
 
-    if (($null -ne $script:SelectedUnit) -and (Test-Path -Path $script:UnitFileScript))
+    if (($null -ne $script:UnitFilePSScript) -or ($null -ne $script:UnitFileAZScript))
     {
-        if ($script:logedin -eq $true)
+        if ((($null -ne $script:SelectedUnit) -and (Test-Path -Path $script:UnitFilePSScript)) -or (($null -ne $script:SelectedUnit) -and (Test-Path -Path $script:UnitFileAZScript)))
         {
-            $imgScriptActive.Visibility = "Visible"
-            $imgScriptInactive.Visibility = "Hidden"
+            if ($script:logedin -eq $true)
+            {
+                $imgScriptActive.Visibility = "Visible"
+                $imgScriptInactive.Visibility = "Hidden"
+            }
+            else
+            {
+                $imgScriptActive.Visibility = "Hidden"
+                $imgScriptInactive.Visibility = "Visible"
+            }
         }
         else
         {
             $imgScriptActive.Visibility = "Hidden"
-            $imgScriptInactive.Visibility = "Visible"
+            $imgScriptInactive.Visibility = "Hidden"
         }
     }
-    else
-    {
-        $imgScriptActive.Visibility = "Hidden"
-        $imgScriptInactive.Visibility = "Hidden"
-    }
+
     RefreshUI
 } # end function ToggleDeployButtons
 
@@ -644,19 +747,18 @@ function FormResize ($SelectedSize) {
 
 function LogoutCleanup {
         $logstring = "So long and thank you for the fish."
-        Add-LogEntry -StatusMessage $logstring -LogEntry $logstring -Severity Info
+        Add-LogEntry -LogEntry $logstring -Severity Info
         Add-LogEntry -LogEntry "--------------------------------------------------------" -Severity Info
         $script:cred = $null
         $script:logedin = $false
-        $cbxTenant.IsChecked = $false
-        $cbxSubscription.IsChecked = $false
-        $tbsbiCenter2.Text = ""
+        #$tbsbiCenter2.Text = ""
         $script:subscriptions = $null
         $cbSubscription.Items.Clear()
         $cbSubscription.IsEnabled = $false
         $script:SelectedSubscriptionName = $null
         $script:SelectedSubscriptionID = $null
         $script:regions = $null
+        #$script:RegionsTable = $null
         $cbRegion.Items.Clear()
         $cbRegion.IsEnabled = $false
         $script:SelectedRegionName = $null
@@ -676,15 +778,86 @@ function LogoutCleanup {
 
         $btnLogin.Content = "login"
         ToggleDeployButtons -Toggle "off"
-        Set-Location -Path $ScriptFolder
+        Set-Location -Path $Script:ScriptFolder
     } # end function LogoutCleanup
+
+function InitializeAzCliForm {
+        try
+    {
+        # Test-Path will return true or false and that does not trigger an error if the file is not there
+        Copy-Item -Path "C:\Users\RolfMcLaughl_cqz\source\repos\AzureMCTHelper\AzureMCTHelper\AzCliLogin.xaml" -Destination "C:\Users\RolfMcLaughl_cqz\OneDrive\PowerShell\Azure MCT Helper\Resources" -Force
+    
+        if(Test-Path -Path "$Script:ScriptFolder\Resources\AzCliLogin.xaml")
+        {
+            [XML]$script:AzCliXAML = (Get-Content $Script:ScriptFolder\Resources\AzCliLogin.xaml) -replace 'Page','Window'
+        }
+        else
+        {
+            Write-Host " The form cannot be found. Closing... " -BackgroundColor Red -ForegroundColor White
+            Exit 1
+        } 
+    }
+    catch
+    {
+        Write-Host " Error locating and loading the form. Closing... " -BackgroundColor Red -ForegroundColor White
+        Exit 1
+    }
+
+    $script:AzCliXAML.Window.RemoveAttribute("x:Class") #removing attributes which are coming from the editor 
+    $script:AzCliXAML.Window.RemoveAttribute("xmlns:mc")
+    $script:AzCliXAML.Window.RemoveAttribute("mc:Ignorable")
+
+    $AzCliReader = New-Object System.Xml.XmlNodeReader $script:AzCliXAML
+    $script:AzCliLogin = [Windows.Markup.XamlReader]::Load($AzCliReader)
+} # end function InitializeAzCliForm 
+
+function GenerateAzCliForm {
+    $script:AzCliXAML.SelectNodes("//*[@Name]") | ForEach-Object {
+            New-Variable -Name ($_.Name) -Value $script:AzCliLogin.FindName($_.Name) -PassThru | ForEach-Object {
+            }
+        }
+} # end function GenerateAzCliForm
+
+function InitializeForm {
+    $Script:ScriptFolder = Get-ScriptDirectory
+    $script:workdir = "$Script:ScriptFolder\Units" # now with an actual value and not just generic
+    Set-Location -Path $script:workdir
+
+    try
+    {
+        # Test-Path will return true or false and that does not trigger an error if the file is not there
+        Copy-Item -Path "C:\Users\RolfMcLaughl_cqz\source\repos\AzureMCTHelper\AzureMCTHelper\MainWindow.xaml" -Destination "C:\Users\RolfMcLaughl_cqz\OneDrive\PowerShell\Azure MCT Helper\Resources" -Force
+    
+        if(Test-Path -Path "$Script:ScriptFolder\Resources\MainWindow.xaml")
+        {
+            [XML]$script:XAML = (Get-Content $Script:ScriptFolder\Resources\MainWindow.xaml) -replace 'Page','Window'
+        }
+        else
+        {
+            Write-Host " The form cannot be found. Closing... " -BackgroundColor Red -ForegroundColor White
+            Exit 1
+        } 
+    }
+    catch
+    {
+        Write-Host " Error locating and loading the form. Closing... " -BackgroundColor Red -ForegroundColor White
+        Exit 1
+    }
+
+    $script:XAML.Window.RemoveAttribute("x:Class") #removing attributes which are coming from the editor 
+    $script:XAML.Window.RemoveAttribute("xmlns:mc")
+    $script:XAML.Window.RemoveAttribute("mc:Ignorable")
+
+    $Reader = New-Object System.Xml.XmlNodeReader $script:XAML
+    $script:AMH = [Windows.Markup.XamlReader]::Load($Reader)
+} # end function InitializeForm
 
 function GenerateForm {
     
     $script:AllControls = [System.Collections.Generic.List[PSObject]]::new()
 
-    $XAML.SelectNodes("//*[@Name]") | ForEach-Object {
-        New-Variable -Name ($_.Name) -Value $AMH.FindName($_.Name) -PassThru | ForEach-Object {
+    $script:XAML.SelectNodes("//*[@Name]") | ForEach-Object {
+        New-Variable -Name ($_.Name) -Value $script:AMH.FindName($_.Name) -PassThru | ForEach-Object {
             $script:AllControls.Add($_.Value)
         }
     }
@@ -695,6 +868,9 @@ function GenerateForm {
     $btnAzureModule.Add_Click($btnAzureModule_Click)
 
     $btnLogin.Add_Click($btnLogin_Click)
+
+    $exContextOpen.Add_MouseEnter($exContextOpen_MouseEnter)
+    $exContextOpen.Add_MouseLeave($exContextOpen_MouseLeave)
     
     $cbTenant.Add_DropDownClosed($cbTenant_DropDownClosed)
     $cbSubscription.Add_DropDownClosed($cbSubscription_DropDownClosed)
@@ -706,7 +882,7 @@ function GenerateForm {
     $btnRGCreate.Add_Click($btnRGCreate_Click)
     
     $imgDeployActive.Add_MouseLeftButtonDown($deploytemplate)
-    $imgScriptActive.Add_MouseLeftButtonDown($deployscript)
+    $imgScriptActive.Add_MouseLeftButtonDown($deployPSscript)
     
     $sliderSize.Add_ValueChanged($sizeValueChanged)
     $cbxVariableReplacement.Add_Unchecked($cbxVariableReplacement_Unchecked)
@@ -718,17 +894,34 @@ function GenerateForm {
     $imgRefreshScripts.Add_MouseLeftButtonDown($refreshScripts_MouseLeftButtonDown)
     $imgRefreshScripts.Add_MouseLeftButtonUp($refreshScripts_MouseLeftButtonUp)
 
-    $AMH.Title = $script:formCaption
+    $lblRefreshUnits.Add_MouseEnter($lblRefreshUnits_MouseEnter)
+    $lblRefreshUnits.Add_MouseLeave($lblRefreshUnits_MouseLeave)
+    $lblRefreshUnits.Add_MouseLeftButtonDown($refreshUnitsList_MouseLeftButtonDown)
+
+    $tabPowerShell.Add_GotFocus($tabPowerShell_GotFocus)
+    $tabAzureCLI.Add_GotFocus($tabAzureCLI_GotFocus)
+
+    $lblRefreshScripts.Add_MouseEnter($lblRefreshScripts_MouseEnter)
+    $lblRefreshScripts.Add_MouseLeave($lblRefreshScripts_MouseLeave)
+    $lblRefreshScripts.Add_MouseLeftButtonDown($refreshScripts_MouseLeftButtonDown)
+
+    $rtfTemplate.Add_MouseDoubleClick($rtfTemplate_MouseDoubleClick)
+    $rtfParameter.Add_MouseDoubleClick($rtfParameter_MouseDoubleClick)
+    $rtfPowerShell.Add_MouseDoubleClick($rtfPowerShell_MouseDoubleClick)
+    $rtfAzureCLI.Add_MouseDoubleClick($rtfAzureCLI_MouseDoubleClick)
+    
+    $script:AMH.Title = $script:formCaption
     $script:StartupWidth = $AMHWindow.Width
     $script:StartupHeight = $AMHWindow.Height
     $script:StartupFontSize = $AMHWindow.FontSize
 
-    $imgDeployActive.Source = "$ScriptFolder\Resources\DeployActive.png"
-    $imgDeployInactive.Source = "$ScriptFolder\Resources\DeployInactive.png"
-    $imgScriptActive.Source = "$ScriptFolder\Resources\ScriptActive.png"
-    $imgScriptInactive.Source = "$ScriptFolder\Resources\ScriptInactive.png"
-    $imgRefreshUnits.Source = "$ScriptFolder\Resources\btnRefresh.png"
-    $imgRefreshScripts.Source = "$ScriptFolder\Resources\btnRefresh.png"
+    $imgDeployActive.Source = "$Script:ScriptFolder\Resources\DeployActive.png"
+    $imgDeployInactive.Source = "$Script:ScriptFolder\Resources\DeployInactive.png"
+    $imgScriptActive.Source = "$Script:ScriptFolder\Resources\ScriptActive.png"
+    $imgScriptInactive.Source = "$Script:ScriptFolder\Resources\ScriptInactive.png"
+    $imgRefreshUnits.Source = "$Script:ScriptFolder\Resources\btnRefresh.png"
+    $imgRefreshScripts.Source = "$Script:ScriptFolder\Resources\btnRefresh.png"
+    $imgAzCLIBulb.Source = "$Script:ScriptFolder\Resources\bulbyellow.png"
 
     $script:SelectedTenantName = $cbTenant.SelectedItem.Content
     $script:SelectedTenantID = $cbTenant.SelectedItem.Tag
@@ -747,61 +940,45 @@ function GenerateForm {
         $btnLogin.IsEnabled = $true
     }
 
+    Find-AzureCLI
+
     Add-LogEntry -LogEntry $script:PreGUIMessages -Severity Info
     $tbLoginUser.Text = $script:DefaultAccount
     FillTenantCB
     FillUnitLB
     Clear-Host
 
-    $AMH.ShowDialog() | Out-Null
+    $script:AMH.ShowDialog() | Out-Null
 } #end function GenerateForm
 
-#endregion functions
-
-#region Init
-    $ScriptFolder = Get-ScriptDirectory
-    $script:workdir = "$ScriptFolder\Units" # now with an actual value and not just generic
-    Set-Location -Path $script:workdir
-
-    try
-    {
-        # Test-Path will return true or false and that does not trigger an error if the file is not there
-        if(Test-Path -Path "$ScriptFolder\Resources\MainWindow.xaml")
-        {
-            [XML]$XAML = (Get-Content $ScriptFolder\Resources\MainWindow.xaml) -replace 'Page','Window'
-        }
-        else
-        {
-            Write-Host " The form cannot be found. Closing... " -BackgroundColor Red -ForegroundColor White
-            Exit 1
-        } 
-    }
-    catch
-    {
-        Write-Host " Error locating and loading the form. Closing... " -BackgroundColor Red -ForegroundColor White
-        Exit 1
-    }
-
-    $XAML.Window.RemoveAttribute("x:Class") #removing attributes which are coming from the editor 
-    $XAML.Window.RemoveAttribute("xmlns:mc")
-    $XAML.Window.RemoveAttribute("mc:Ignorable")
-
-    $Reader = New-Object System.Xml.XmlNodeReader $XAML
-    $AMH = [Windows.Markup.XamlReader]::Load($Reader)
-
-#endregion Init
+#endregion Functions
 
 #region Eventhandling
-    
+
+    $exContextOpen_MouseEnter = {
+        If ($exContextOpen.IsExpanded -eq $false)
+        {
+             $exContextOpen.IsExpanded = $true
+        }
+        
+    }
+
+    $exContextOpen_MouseLeave = {
+        If ($exContextOpen.IsExpanded -eq $true)
+        {
+             $exContextOpen.IsExpanded = $false
+        }
+    }
+
     $btnAzureModule_Click = {
     If ($script:SkipAzModuleStatus -eq $false)
     {
         $logstring = "verifying Azure module installation status"
-        Add-LogEntry -StatusMessage $logstring -LogEntry $logstring -Severity Info
+        Add-LogEntry -LogEntry $logstring -Severity Info
         $btnAzureModule.Content = "verifying..."
         RefreshUI
         $logstring = "Installing Azure module"
-        Add-LogEntry -StatusMessage $logstring -LogEntry $logstring -Severity Info
+        Add-LogEntry -LogEntry $logstring -Severity Info
         Add-Module -module Az
         if ($script:AzModuleInstalled -eq $true)
         {
@@ -815,13 +992,13 @@ function GenerateForm {
         else
         {   
             $logstring = "Azure module not installed"
-            Add-LogEntry -StatusMessage $logstring -LogEntry $logstring -Severity Warning
+            Add-LogEntry -LogEntry $logstring -Severity Warning
             $lblAzureModuleStatus.Content = "not installed"}
         }
     elseif ($script:SkipAzModuleStatus -eq $true)
     {
         $logstring = "Azure module installation status skipped"
-        Add-LogEntry -StatusMessage $logstring -LogEntry $logstring -Severity Info
+        Add-LogEntry -LogEntry $logstring -Severity Info
         $script:AzModuleInstalled = $true
         $lblAzureModuleStatus.Content = "skipped"
         $btnAzureModule.Content = "Verify"
@@ -839,7 +1016,7 @@ function GenerateForm {
             if ($tbLoginUser.Text -eq "")
             {
                 $logstring = "Please provide a valid account for the Azure login"
-                Add-LogEntry -StatusMessage $logstring -LogEntry $logstring -Severity Warning
+                Add-LogEntry -LogEntry $logstring -Severity Warning
             }
             else
             {
@@ -850,13 +1027,13 @@ function GenerateForm {
                     try
                     {
                         $logstring = "Connecting MSA account $($tbLoginUser.Text)"
-                        Add-LogEntry -StatusMessage $logstring -LogEntry $logstring -Severity Info
+                        Add-LogEntry -LogEntry $logstring -Severity Info
                         Connect-AzAccount -Tenant $script:SelectedTenantID -SkipContextPopulation -WarningAction SilentlyContinue -ErrorAction SilentlyContinue
                     }
                     catch
                     {
                         $logstring = "Cannot log in with MSA account $($tbLoginUser.Text)"
-                        Add-LogEntry -StatusMessage $logstring -LogEntry $logstring -Severity Error
+                        Add-LogEntry -LogEntry $logstring -Severity Error
                     }
                 }
                 else
@@ -866,44 +1043,42 @@ function GenerateForm {
                     try
                     {
                         $logstring = "Connecting work or school account $($tbLoginUser.Text)"
-                        Add-LogEntry -StatusMessage $logstring -LogEntry $logstring -Severity Info
+                        Add-LogEntry -LogEntry $logstring -Severity Info
                         Connect-AzAccount -Tenant $script:SelectedTenantID -Credential $script:cred -SkipContextPopulation -WarningAction SilentlyContinue -ErrorAction SilentlyContinue
                     }
                     catch
                     {
                         $logstring = "Cannot log in with work or school account $($tbLoginUser.Text)"
-                        Add-LogEntry -StatusMessage $logstring -LogEntry $logstring -Severity Error
+                        Add-LogEntry -LogEntry $logstring -Severity Error
                     }
                     
                 }
                 If ($error.Count -eq 0)
                 {
                     $script:logedin = $true
-                    $cbxTenant.IsChecked = $true
-                    $tbsbiCenter2.Text = $tbLoginUser.Text
+                    #$tbsbiCenter2.Text = $tbLoginUser.Text
                     $btnLogin.Content = "logout"
                     FillSubscriptionCB
                     If ($null -ne $script:SelectedSubscriptionID)
                     {
                         $logstring = "Context: $script:SelectedTenantName and $script:SelectedSubscriptionName"
-                        Add-LogEntry -StatusMessage $logstring -LogEntry $logstring -Severity Info
+                        Add-LogEntry -LogEntry $logstring -Severity Info
                         Set-AzContext -Tenant $script:SelectedTenantID -Subscription $script:SelectedSubscriptionID
                         FillRegionCB
                     }
                     else
                     {
                         $logstring = "No accessible subscription for user $($tbLoginUser.Text) in $script:SelectedTenantName"
-                        Add-LogEntry -StatusMessage $logstring -LogEntry $logstring -Severity Error
+                        Add-LogEntry -LogEntry $logstring -Severity Error
                     }
                     RefreshUI
                 }
                 else
                 {
                     $script:logedin = $false
-                    $cbxTenant.IsChecked = $false
-                    $tbsbiCenter2.Text = ""
+                    #$tbsbiCenter2.Text = ""
                     $logstring = "Error while logging in $($tbLoginUser.Text) to $script:SelectedTenantName"
-                    Add-LogEntry -StatusMessage $logstring -LogEntry $logstring -Severity Error
+                    Add-LogEntry -LogEntry $logstring -Severity Error
                 }
             }
             ToggleDeployButtons -Toggle off
@@ -914,7 +1089,7 @@ function GenerateForm {
             LogoutCleanup 
         }
     }
-    
+
     $cbTenant_DropDownClosed = {
         $script:SelectedTenantName = $cbTenant.SelectedItem.Content
         $script:SelectedTenantID = $cbTenant.SelectedItem.Tag
@@ -933,20 +1108,16 @@ function GenerateForm {
             $script:SelectedSubscriptionID = $cbSubscription.SelectedItem.Tag
             If ($null -ne $script:SelectedSubscriptionName) {
                 $logstring = "Context: $script:SelectedTenantName and $script:SelectedSubscriptionName"
-                Add-LogEntry -StatusMessage $logstring -LogEntry $logstring -Severity Info
+                Add-LogEntry -LogEntry $logstring -Severity Info
                 Set-AzContext -Tenant $script:SelectedTenantID -Subscription $script:SelectedSubscriptionID
-                $cbxSubscription.IsChecked = $true
                 FillResourceGroupCB
             }
             else
             {
-                $cbxSubscription.IsChecked = $false
                 $cbResourceGroup.IsEnabled = $false
                 $script:SelectedRecourcegroupName = $null
                 $cbResourceGroup.Text = "(New) Resource group"
             }
-            #RefreshUI
-            
         }
         RefreshUI
     }
@@ -956,7 +1127,6 @@ function GenerateForm {
         { 
             $script:SelectedRegionName = $cbRegion.SelectedItem.Name
             $script:SelectedRegionDisplayName = $cbRegion.SelectedItem.Content
-            #FillResourceGroupCB
         }
         RefreshUI
     }
@@ -987,7 +1157,7 @@ function GenerateForm {
         If ($script:NewRecourcegroupName)
         {
             $logstring = "New RG $script:NewRecourcegroupName in $script:SelectedRecourcegroupRegion"
-            Add-LogEntry -StatusMessage $logstring -LogEntry $logstring -Severity Info
+            Add-LogEntry -LogEntry $logstring -Severity Info
             New-AzResourceGroup -Name $script:NewRecourcegroupName -Location $script:SelectedRecourcegroupRegion -Tag $script:AzResourceTag -Force
             $btnRGCreate.IsEnabled = $false
             FillResourceGroupCB
@@ -1001,6 +1171,34 @@ function GenerateForm {
 
     $refreshUnitsList_MouseLeftButtonUp = {
         $imgRefreshUnits.Effect = $script:DropdownShaddow
+    }
+
+    $lblRefreshUnits_MouseEnter = {
+        If ($lblRefreshUnits.Background.Color -ne '#FFD3D3D3')  #"LightGray"
+        {
+            $lblRefreshUnits.Background = '#FFD3D3D3' #"LightGray"
+        }
+    }
+
+    $lblRefreshUnits_MouseLeave = {
+        If ($lblRefreshUnits.Background.Color -eq '#FFD3D3D3')  #"LightGray"
+        {
+            $lblRefreshUnits.Background = '#00FFFFFF'
+        }
+    }
+
+    $lblRefreshScripts_MouseEnter = {
+        If ($lblRefreshScripts.Background.Color -ne '#FFD3D3D3')  #"LightGray"
+        {
+            $lblRefreshScripts.Background = '#FFD3D3D3' #"LightGray"
+        }
+    }
+
+    $lblRefreshScripts_MouseLeave = {
+        If ($lblRefreshScripts.Background.Color -eq '#FFD3D3D3')  #"LightGray"
+        {
+            $lblRefreshScripts.Background = '#00FFFFFF'
+        }
     }
 
     $refreshScripts_MouseLeftButtonDown = {
@@ -1021,27 +1219,53 @@ function GenerateForm {
             FillUnitTemplate
             FillUnitTemplateParameter
             FillUnitPowerShell
+            FillUnitAzureCLI
             $imgRefreshScripts.Effect = $script:DropdownShaddow
         }
     }
 
     $refreshScripts_MouseLeftButtonUp = {
         $imgRefreshScripts.Effect = $script:DropdownShaddow
-        #RefreshUI
+    }
+
+    $tabPowerShell_GotFocus = {
+        FillUnitPowerShell
+    }
+
+    $tabAzureCLI_GotFocus = {
+        FillUnitAzureCLI
     }
 
     $cbxVariableReplacement_Checked = {
         FillUnitPowerShell
+        FillUnitAzureCLI
     }
 
     $cbxVariableReplacement_Unchecked = {
         FillUnitPowerShell
+        FillUnitAzureCLI
+    }
+
+    $rtfTemplate_MouseDoubleClick = {
+        & $script:DefaultEditor $script:UnitFileDeploy
+    }
+
+    $rtfParameter_MouseDoubleClick = {
+        & $script:DefaultEditor $script:UnitFileParameter
+    }
+
+    $rtfPowerShell_MouseDoubleClick = {
+        & $script:DefaultEditor $script:UnitFilePSScript
+    }
+
+    $rtfAzureCLI_MouseDoubleClick = {
+        & $script:DefaultEditor $script:UnitFileAZScript
     }
 
     $deploytemplate = {
 
         $logstring = "Deploying with script: $script:UnitFileDeploy"
-        Add-LogEntry -StatusMessage $logstring -LogEntry $logstring -Severity Info
+        Add-LogEntry -LogEntry $logstring -Severity Info
         
         if ($psversiontable.psversion.major -eq 5) # because ConvertFrom-Json added the parameter -AsHashtable later only local files will be used
         { # -TemplateFile & -TemplateParameterFile
@@ -1052,7 +1276,7 @@ function GenerateForm {
             else
             {
                 $logstring = "Cannot deploy GitHub scripts with this version of PowerShell"
-                Add-LogEntry -StatusMessage $logstring -LogEntry $logstring -Severity Error
+                Add-LogEntry -LogEntry $logstring -Severity Error
             }
         }
         elseif ($psversiontable.psversion.major -gt 5)
@@ -1081,17 +1305,31 @@ function GenerateForm {
         Add-Output
     }
 
-    $deployscript = {
-        $logstring = "Deploying with script: $script:UnitFileScript"
-        Add-LogEntry -StatusMessage $logstring -LogEntry $logstring -Severity Info
+    $deployPSscript = {
+        $logstring = "Deploying with script: $script:UnitFilePSScript"
+        Add-LogEntry -LogEntry $logstring -Severity Info
 
-        $PSscript = Get-Content $script:UnitFileScript
+        $PSscript = Get-Content $script:UnitFilePSScript
         if ($cbxVariableReplacement.IsChecked -eq $true)
         {
             $PSscript = ReplaceScriptVariables -line2replace $PSscript
         }
         $PSScriptBlock = [scriptblock]::Create($PSscript)
         $script:AzureOutput = Invoke-Command -ScriptBlock $PSScriptBlock -WarningAction SilentlyContinue -ErrorAction SilentlyContinue
+        Add-Output
+    }
+
+    $deployAZscript = {
+        $logstring = "Deploying with script: $script:UnitFileAZScript"
+        Add-LogEntry -LogEntry $logstring -Severity Info
+
+        $AZscript = Get-Content $script:UnitFileAZScript
+        if ($cbxVariableReplacement.IsChecked -eq $true)
+        {
+            $AZscript = ReplaceScriptVariables -line2replace $AZscript
+        }
+        $AZScriptBlock = [scriptblock]::Create($AZSscript)
+        $script:AzureOutput = Invoke-Command -ScriptBlock $AZScriptBlock -WarningAction SilentlyContinue -ErrorAction SilentlyContinue
         Add-Output
     }
 
@@ -1105,4 +1343,5 @@ function GenerateForm {
 
 #endregion Eventhandling
 
+InitializeForm
 GenerateForm
