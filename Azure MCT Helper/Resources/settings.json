@@ -1,38 +1,28 @@
 {
     "version": "1",
     "defaults": {
-        "formCaption": "Azure MCT Helper v0.8",
+        "formCaption": "Azure MCT Helper v0.9",
         "workdir": "Units",
-        "SkipAzModuleStatus": true,
-        "DefaultTenant": "McLaughlin Training (Demo)",
+        "SkipAzModuleStatus": false,
+        "DefaultTenant": "Contoso Training (Demo)",
         "DefaultSubscription": "MCT Rolf",
         "DefaultRegion": "northeurope",
         "DefaultRegionLong": "North Europe",
         "DefaultResourceGroup": "AzClass",
-        "DefaultAccount": "0",
-        "DefaultEditor": "0"
+        "DefaultAccount": "0"
         },
     "tenants": [
         {
-            "Name": "McLaughlin Training (Demo)",
-            "ID": "d538307a-12d9-48c5-8da5-74a6f48e9f9f"
+            "Name": "Contoso Training (Demo)",
+            "ID": "12345678-1234-5678-abcd-12345678abcd"
         },
         {
-            "Name": "mclaughlin.cloud (O365)",
-            "ID": "da29e18b-8d0c-4380-9c36-21a6a91c2667"
-        },
-        {
-            "Name": "McLaughlin42",
-            "ID": "e7eab3ec-d97e-43e5-9ae2-9d9c760561a0"
+            "Name": "Contoso",
+            "ID": "12345678-5678-1234-abcd-12345678abcd"
         }
     ],
     "accounts": [
-        "rolf@mclaughlin.training",
-        "rolf.mclaughlin@outlook.com"
-    ],
-    "editors": [
-        "code",
-        "ise",
-        "notepad"
+        "rolf@contosodemo.com",
+        "rolf@contoso.com"
     ]
 }

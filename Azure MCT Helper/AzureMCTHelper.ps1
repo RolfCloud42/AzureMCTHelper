@@ -785,9 +785,7 @@ function InitializeAzCliForm {
         try
     {
         # Test-Path will return true or false and that does not trigger an error if the file is not there
-        Copy-Item -Path "C:\Users\RolfMcLaughl_cqz\source\repos\AzureMCTHelper\AzureMCTHelper\AzCliLogin.xaml" -Destination "C:\Users\RolfMcLaughl_cqz\OneDrive\PowerShell\Azure MCT Helper\Resources" -Force
-    
-        if(Test-Path -Path "$Script:ScriptFolder\Resources\AzCliLogin.xaml")
+        if (Test-Path -Path "$Script:ScriptFolder\Resources\AzCliLogin.xaml")
         {
             [XML]$script:AzCliXAML = (Get-Content $Script:ScriptFolder\Resources\AzCliLogin.xaml) -replace 'Page','Window'
         }
@@ -826,9 +824,7 @@ function InitializeForm {
     try
     {
         # Test-Path will return true or false and that does not trigger an error if the file is not there
-        Copy-Item -Path "C:\Users\RolfMcLaughl_cqz\source\repos\AzureMCTHelper\AzureMCTHelper\MainWindow.xaml" -Destination "C:\Users\RolfMcLaughl_cqz\OneDrive\PowerShell\Azure MCT Helper\Resources" -Force
-    
-        if(Test-Path -Path "$Script:ScriptFolder\Resources\MainWindow.xaml")
+        if (Test-Path -Path "$Script:ScriptFolder\Resources\MainWindow.xaml")
         {
             [XML]$script:XAML = (Get-Content $Script:ScriptFolder\Resources\MainWindow.xaml) -replace 'Page','Window'
         }
