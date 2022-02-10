@@ -1425,7 +1425,7 @@ function GenerateForm {
         {
             $AZscript = ReplaceScriptVariables -line2replace $AZscript
         }
-        $AZScriptBlock = [scriptblock]::Create($AZSscript)
+        $AZScriptBlock = [scriptblock]::Create($AZscript)
         $script:AzureOutput = Invoke-Command -ScriptBlock $AZScriptBlock -WarningAction SilentlyContinue -ErrorAction SilentlyContinue
         Add-Output
     }

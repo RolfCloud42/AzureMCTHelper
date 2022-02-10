@@ -4,11 +4,16 @@
         "azuredeployjson",
         "azuredeployparameter",
         "azurescript",
+        "bulbgreen",
+        "bulbred",
+        "bulbyellow",
+        "Clicontrol",
         "deployscript",
         "deploytemplate",
         "docu",
         "endregion",
         "Eventhandling",
+        "HKLM",
         "hotmail",
         "Inlines",
         "Laughl",
@@ -24,6 +29,8 @@
         "scriptfolder",
         "Shaddow",
         "subfolders",
+        "successfull",
+        "tabname",
         "tbsbi"
     ]
 }

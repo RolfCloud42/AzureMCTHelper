@@ -64,5 +64,3 @@ Through the separate controls the Azure context is configured. The context inclu
 The dropdown list "Resource group(s)" even allows you to create new resource groups based on the information provided.
 
 ### Unit area
-
- 
