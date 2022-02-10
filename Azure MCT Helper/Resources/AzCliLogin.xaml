@@ -3,45 +3,51 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:AzureMCTHelper"
         mc:Ignorable="d"
-        Title="Azure CLI Login" MinHeight="400" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" FontSize="11">
-    <Grid Margin="5,5,5,5" >
+        Name="AzCliLogin" Title="Azure CLI Login" FontSize="11" WindowStartupLocation="CenterScreen" SizeToContent="WidthAndHeight" ResizeMode="NoResize" ShowInTaskbar="False" >
+    <Grid Margin="5,5,5,5">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1*" />
+        </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="0.5*" />
-            <RowDefinition Height="4*" />
-            <RowDefinition Height="0.8*" />
+            <RowDefinition Height="1*" />
         </Grid.RowDefinitions>
-        <TextBlock Name="AzLoginInfo" Text="https://docs.microsoft.com/en-us/cli/azure/authenticate-azure-cli" Grid.Row="0" Margin="5,5,5,5"/>
-        <StackPanel Grid.Row="1" Orientation="Vertical" VerticalAlignment="Stretch">
-            <Expander IsExpanded="True" Header="Credentials" Margin="0,0,0,25" VerticalAlignment="Top">
+        <StackPanel Grid.Row="0" Orientation="Vertical" Grid.Column="0">
+            <Expander Name="exAzCliCred" IsExpanded="True" Header="Credentials" Margin="0,0,0,25" VerticalAlignment="Top" HorizontalAlignment="Left">
                 <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="az login -u  " Margin="5,5,5,5"/>
-                    <TextBox Name="txtUsernameCred" Width="80" ToolTip="username goes here" BorderThickness="1,1,1,1"/>
-                    <TextBlock Text=" -p  " Margin="5,5,5,5"/>
-                    <PasswordBox Name="pwbUserPassword" Width="80" ToolTip="password goes here"/>
+                    <RadioButton Name="rbAzCliCR" IsChecked="True" Margin="5,5,5,5" VerticalAlignment="Center" Visibility="Hidden"/>
+                    <Image Name="imgAzCLIBulbCR" HorizontalAlignment="Center" Height="30" VerticalAlignment="Center" Visibility="Visible" ToolTip="Select the bulb to log out"/>
+                    <TextBlock Text="az login -u  " Margin="5,5,5,5" VerticalAlignment="Center"/>
+                    <TextBox Name="txtUsernameCred" MinWidth="150" MaxWidth="250" Width="Auto" ToolTip="username goes here" BorderThickness="1,1,1,1" VerticalContentAlignment="Center"/>
+                    <TextBlock Text=" -p  " Margin="5,5,5,5" VerticalAlignment="Center"/>
+                    <PasswordBox Name="pwbUserPassword" MinWidth="80" MaxWidth="250" Width="Auto" ToolTip="password goes here" VerticalContentAlignment="Center"/>
                 </StackPanel>
             </Expander>
-            <Expander IsExpanded="True" Header="Service principal" Margin="0,0,0,25" VerticalAlignment="Top">
+            <Expander Name="exAzCliSP" IsExpanded="False" Header="Service principal" Margin="0,0,0,25" VerticalAlignment="Top" HorizontalAlignment="Left">
                 <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="az login --service-principal -u  " Margin="5,5,5,5"/>
-                    <TextBox Name="txtSPnameCred" Width="80" ToolTip="app-id goes here" BorderThickness="1,1,1,1"/>
-                    <TextBlock Text=" -p  " Margin="5,5,5,5"/>
-                    <PasswordBox Name="pwbSPPassword" Width="80" ToolTip="password or cert goes here"/>
-                    <TextBlock Text=" --tenant  " Margin="5,5,5,5"/>
-                    <TextBox Name="txtSPTeanatName" Width="80" ToolTip="tenant name or id goes here" BorderThickness="1,1,1,1"/>
+                    <RadioButton Name="rbAzCliSP" IsChecked="False" Margin="5,5,5,5" VerticalAlignment="Center" Visibility="Hidden"/>
+                    <Image Name="imgAzCLIBulbSP" HorizontalAlignment="Center" Height="30" VerticalAlignment="Center" Visibility="Visible" ToolTip="Select the bulb to log out"/>
+                    <TextBlock Text="az login --service-principal -u  " Margin="5,5,5,5" VerticalAlignment="Center"/>
+                    <TextBox Name="txtSPnameCred" MinWidth="150" MaxWidth="250" Width="Auto" ToolTip="app-id goes here" BorderThickness="1,1,1,1" VerticalContentAlignment="Center"/>
+                    <TextBlock Text=" -p  " Margin="5,5,5,5" VerticalAlignment="Center"/>
+                    <PasswordBox Name="pwbSPPassword" MinWidth="80" MaxWidth="250" Width="Auto" ToolTip="password or cert goes here" VerticalContentAlignment="Center"/>
+                    <TextBlock Text=" --tenant  " Margin="5,5,5,5" VerticalAlignment="Center"/>
+                    <TextBox Name="txtSPTenantName" MinWidth="150" MaxWidth="250" Width="Auto" ToolTip="tenant name or id goes here" BorderThickness="1,1,1,1" VerticalContentAlignment="Center"/>
                 </StackPanel>
             </Expander>
-            <Expander IsExpanded="True" Header="Managed identity" Margin="0,0,0,25" VerticalAlignment="Top">
+            <Expander Name="exAzCliMI" IsExpanded="False" Header="Managed identity" Margin="0,0,0,25" VerticalAlignment="Top" HorizontalAlignment="Left" ToolTip="Direct network connection to 169.254.169.254 required!">
                 <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="az login --identity --username  " Margin="5,5,5,5"/>
-                    <TextBox Name="txtMIDName" Width="80" ToolTip="client_id|object_id|resource_id goes here" BorderThickness="1,1,1,1"/>
+                    <RadioButton Name="rbAzCliMI" IsChecked="False" Margin="5,5,5,5" VerticalAlignment="Center" Visibility="Hidden"/>
+                    <Image Name="imgAzCLIBulbMI" HorizontalAlignment="Center" Height="30" VerticalAlignment="Center" Visibility="Visible" ToolTip="Select the bulb to log out"/>
+                    <TextBlock Text="az login --identity --username  " Margin="5,5,5,5" VerticalAlignment="Center"/>
+                    <TextBox Name="txtMIDName" MinWidth="150" MaxWidth="250" Width="Auto" ToolTip="client_id|object_id|resource_id goes here" BorderThickness="1,1,1,1" VerticalContentAlignment="Center"/>
                 </StackPanel>
             </Expander>
-        </StackPanel>
-        <StackPanel Orientation="Horizontal" Grid.Row="2" HorizontalAlignment="Right">
-            <Button Name="btnAzCliCancel" Content="Cancel" Width="80" Height="30" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0,0,15,15"/>
-            <Button Name="btnAzCliLogin" Content="Login" Width="80" Height="30" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0,0,15,15"/>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <TextBlock Name="AzLoginInfo" Text="https://docs.microsoft.com/en-us/cli/azure/authenticate-azure-cli" Margin="5,5,100,5" HorizontalAlignment="Left" />
+                <Button Name="btnAzCliLogin" Content="Login" Width="80" Height="30" HorizontalAlignment="Right" Margin="0,0,15,15" IsDefault="True"/>
+                <Button Name="btnAzCliCancel" Content="Close" Width="80" Height="30" HorizontalAlignment="Right" Margin="0,0,15,15" IsCancel="True"/>
+            </StackPanel>
         </StackPanel>
     </Grid>
 </Window>

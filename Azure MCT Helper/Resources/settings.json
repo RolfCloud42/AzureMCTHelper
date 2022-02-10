@@ -5,7 +5,7 @@
         "workdir": "Units",
         "SkipAzModuleStatus": false,
         "DefaultTenant": "Contoso Training (Demo)",
-        "DefaultSubscription": "MCT Rolf",
+        "DefaultSubscription": "Azure Pass",
         "DefaultRegion": "northeurope",
         "DefaultRegionLong": "North Europe",
         "DefaultResourceGroup": "AzClass",

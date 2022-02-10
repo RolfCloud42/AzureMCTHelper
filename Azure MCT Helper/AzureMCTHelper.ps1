@@ -21,7 +21,6 @@ Add-Type -AssemblyName PresentationFramework # needed when starting the script f
     $script:SelectedSubscriptionID = $null
     
     $script:regions = $null
-    #$script:RegionsTable = @{}
     $script:SelectedRegionName = $null
     $script:SelectedRegionDisplayName = $null
     
@@ -39,6 +38,8 @@ Add-Type -AssemblyName PresentationFramework # needed when starting the script f
 
     [bool]$script:AzModuleInstalled = $false
     [bool]$script:logedin = $false
+    [bool]$script:CliLogin = $false
+    $script:CliLoginType = "CR"
     [bool]$script:UnitParameterChanged = $false
     
     $script:cred = $null
@@ -193,11 +194,15 @@ function Find-AzureCLI {
 
     If ($script:AzCliIsInstalled) 
     {
-        $tabAzureCLI.Visibility = "Visible"
+        #$tabAzureCLI.Visibility = "Visible"
+        $imgAzCLIBulb.Source = "$Script:ScriptFolder\Resources\bulbyellow.png"
+        $imgAzCLIBulb.Tooltip = "Select the icon to login with Azure CLI."
     }
     else
     {
-        $tabAzureCLI.Visibility = "Collapsed"
+        $imgAzCLIBulb.Source = "$Script:ScriptFolder\Resources\bulbred.png"
+        $imgAzCLIBulb.Tooltip = "Azure CLI not installed!"
+
     }
 } # end function Find-AzureCLI 
 
@@ -206,7 +211,7 @@ function GetAMHSettings {
     {
         try
         {
-            if(Test-Path -Path "$Script:ScriptFolder\Resources\settings.json") {
+            if (Test-Path -Path "$Script:ScriptFolder\Resources\settings.json") {
                 $script:settings = Get-Content -Path $Script:ScriptFolder\Resources\settings.json | ConvertFrom-Json
                 Write-Host "Settings loaded from JSON..."
                 $script:PreGUIMessages += "Settings loaded from JSON..."
@@ -357,7 +362,6 @@ function FillRegionCB {
             $RegionNewListBoxItem.Name = $region.Location
             $RegionNewListBoxItem.Content = $region.DisplayName
             $RegionNewListBoxItem.Tag = $region.Location
-            #$script:RegionsTable."$($region.Location)" = "$($region.DisplayName)" # needed for string replacement in scripts later
             $cbRegion.Items.Add($RegionNewListBoxItem) | Out-Null
         }
         If ($RegionNewListBoxItem.Name -eq $script:DefaultRegion)
@@ -443,7 +447,7 @@ function FillUnitLB {
 } # end function FillUnitLB
 
 function FillUnitInfo {
-    if(Test-Path -Path $script:UnitFileInfo) {
+    if (Test-Path -Path $script:UnitFileInfo) {
         $tbUnitInfo.Text = Get-Content -Path $script:UnitFileInfo
     }
     else {
@@ -513,7 +517,6 @@ function ReplaceScriptVariables ($script2replace) {
     $script:script2return = $script2replace
     If ($null -ne $script:regions)
     {
-        #Foreach ($AzLocation in $script:RegionsTable) {
         Foreach ($AzLocation in $script:Regions) {
             If ($script2replace -match $AzLocation.DisplayName)
             {
@@ -522,7 +525,6 @@ function ReplaceScriptVariables ($script2replace) {
             }
         }
 
-        #Foreach ($AzLocation in $script:RegionsTable) {
         Foreach ($AzLocation in $script:Regions) {
             If ($script2replace -match $AzLocation.Location)
             {
@@ -729,21 +731,80 @@ function ToggleDeployButtons ($Toggle) {
     RefreshUI
 } # end function ToggleDeployButtons
 
+function ToggleAzCliExpander ($expander) {
+    switch ($expander.Name)
+    {
+        'exAzCliCred'  {
+                            $exAzCliSP.IsExpanded = $false
+                            $exAzCliMI.IsExpanded = $false
+                            $rbAzCliCR.IsChecked = $true
+                            $rbAzCliSP.IsChecked = $false
+                            $rbAzCliMI.IsChecked = $false
+                            $script:CliLoginType = "CR"
+                            break
+                        }
+        'exAzCliSP'    {
+                            $exAzCliCred.IsExpanded = $false
+                            $exAzCliMI.IsExpanded = $false
+                            $rbAzCliCR.IsChecked = $false
+                            $rbAzCliSP.IsChecked = $true
+                            $rbAzCliMI.IsChecked = $false
+                            $script:CliLoginType = "SP"
+                            break
+                        }
+        'exAzCliMI'    {
+                            $exAzCliCred.IsExpanded = $false
+                            $exAzCliSP.IsExpanded = $false
+                            $rbAzCliCR.IsChecked = $false
+                            $rbAzCliSP.IsChecked = $false
+                            $rbAzCliMI.IsChecked = $true
+                            $script:CliLoginType = "MI"
+                            break
+                        }
+    }
+} # end function ToggleAzCliExpander 
+
 function FormResize ($SelectedSize) {
-    $multiplier = $SelectedSize/100
+    $script:multiplier = $SelectedSize/100
     
-    $AMHWindow.Width = $script:StartupWidth * $multiplier
-    $AMHWindow.Height = $script:StartupHeight * $multiplier
+    $AMHWindow.Width = $script:StartupWidth * $script:multiplier
+    $AMHWindow.Height = $script:StartupHeight * $script:multiplier
     
     Foreach ($control in $script:AllControls)
     {
         if ($control.FontSize) {
-            $control.FontSize = $script:StartupFontSize * $multiplier
+            $control.FontSize = $script:StartupFontSize * $script:multiplier
         }
     }
     $script:sliderValueBefore = $sliderSize.Value
     RefreshUI
 } # end function FormResize
+
+function FormAzCliResize {
+    $script:AzCliLogin.Width = $script:StartupWidth * $script:multiplier
+    $script:AzCliLogin.Height = $script:StartupHeight * $script:multiplier
+    
+    Foreach ($AzClicontrol in $script:AllAzCliControls)
+    {
+        if ($AzClicontrol.FontSize) {
+            $AzClicontrol.FontSize = $script:StartupFontSize * $script:multiplier
+        }
+    }
+    RefreshUI
+} # end function FormResize
+
+function LogoutAzCli {
+    if ($script:CliLogin -eq $true) 
+    {
+        Az Logout
+        $script:CliLogin = $false
+        $imgAzCLIBulb.Source = "$Script:ScriptFolder\Resources\bulbyellow.png"
+        $imgAzCLIBulbCR.Source = "$Script:ScriptFolder\Resources\bulbyellow.png"
+        $imgAzCLIBulbSP.Source = "$Script:ScriptFolder\Resources\bulbyellow.png"
+        $imgAzCLIBulbMI.Source = "$Script:ScriptFolder\Resources\bulbyellow.png"
+    }
+
+} # end function LogoutAzCli
 
 function LogoutCleanup {
         $logstring = "So long and thank you for the fish."
@@ -758,7 +819,6 @@ function LogoutCleanup {
         $script:SelectedSubscriptionName = $null
         $script:SelectedSubscriptionID = $null
         $script:regions = $null
-        #$script:RegionsTable = $null
         $cbRegion.Items.Clear()
         $cbRegion.IsEnabled = $false
         $script:SelectedRegionName = $null
@@ -773,7 +833,10 @@ function LogoutCleanup {
         $cbxVariableReplacement.IsEnabled = $false
         $cbxVariableReplacement.Visibility = "Hidden"
         $lblVariableReplacement.Visibility = "Hidden"
-        
+        if ($script:CliLogin -eq $true) 
+        {
+            Az Logout
+        }
         Disconnect-AzAccount
 
         $btnLogin.Content = "login"
@@ -782,7 +845,7 @@ function LogoutCleanup {
     } # end function LogoutCleanup
 
 function InitializeAzCliForm {
-        try
+    try
     {
         # Test-Path will return true or false and that does not trigger an error if the file is not there
         if (Test-Path -Path "$Script:ScriptFolder\Resources\AzCliLogin.xaml")
@@ -810,10 +873,46 @@ function InitializeAzCliForm {
 } # end function InitializeAzCliForm 
 
 function GenerateAzCliForm {
+    $script:AllAzCliControls = [System.Collections.Generic.List[PSObject]]::new()
     $script:AzCliXAML.SelectNodes("//*[@Name]") | ForEach-Object {
             New-Variable -Name ($_.Name) -Value $script:AzCliLogin.FindName($_.Name) -PassThru | ForEach-Object {
+                $script:AllAzCliControls.Add($_.Value)
             }
         }
+    
+    $script:StartupAzCliWidth = $script:AzCliLogin.Width
+    $script:StartupAzCliHeight = $script:AzCliLogin.Height
+
+    $btnAzCliCancel.Add_Click($btnAzCliCancel_Click)
+    $btnAzCliLogin.Add_Click($btnAzCliLogin_Click)
+
+    $exAzCliCred.Add_Expanded($exAzCliCred_Expanded)
+    $exAzCliSP.Add_Expanded($exAzCliSP_Expanded)
+    $exAzCliMI.Add_Expanded($exAzCliMI_Expanded)
+
+    $imgAzCLIBulbCR.Add_MouseLeftButtonDown($imgAzCLIBulbCR_MouseLeftButtonDown)
+    $imgAzCLIBulbSP.Add_MouseLeftButtonDown($imgAzCLIBulbSP_MouseLeftButtonDown)
+    $imgAzCLIBulbMI.Add_MouseLeftButtonDown($imgAzCLIBulbMI_MouseLeftButtonDown)
+
+    $txtUsernameCred.Text = $tbLoginUser.Text
+    $txtSPTenantName.Text = $script:SelectedTenantID
+    $imgAzCLIBulbCR.Source = "$Script:ScriptFolder\Resources\bulbyellow.png"
+    $imgAzCLIBulbSP.Source = "$Script:ScriptFolder\Resources\bulbyellow.png"
+    $imgAzCLIBulbMI.Source = "$Script:ScriptFolder\Resources\bulbyellow.png"
+
+    if ($script:CliLogin -eq $true)
+    {
+        switch ($script:CliLoginType) {
+        'CR' {$imgAzCLIBulbCR.Source = "$Script:ScriptFolder\Resources\bulbgreen.png"}
+        'SP' {$imgAzCLIBulbSP.Source = "$Script:ScriptFolder\Resources\bulbgreen.png"}
+        'MI' {$imgAzCLIBulbMI.Source = "$Script:ScriptFolder\Resources\bulbgreen.png"}
+        }
+    }
+    
+    FormAzCliResize
+
+    $script:AzCliLogin.ShowDialog() | Out-Null
+
 } # end function GenerateAzCliForm
 
 function InitializeForm {
@@ -896,6 +995,7 @@ function GenerateForm {
 
     $tabPowerShell.Add_GotFocus($tabPowerShell_GotFocus)
     $tabAzureCLI.Add_GotFocus($tabAzureCLI_GotFocus)
+    $imgAzCLIBulb.Add_MouseLeftButtonDown($imgAzCLIBulb_MouseLeftButtonDown)
 
     $lblRefreshScripts.Add_MouseEnter($lblRefreshScripts_MouseEnter)
     $lblRefreshScripts.Add_MouseLeave($lblRefreshScripts_MouseLeave)
@@ -910,6 +1010,7 @@ function GenerateForm {
     $script:StartupWidth = $AMHWindow.Width
     $script:StartupHeight = $AMHWindow.Height
     $script:StartupFontSize = $AMHWindow.FontSize
+    $script:multiplier = $sliderSize.Value/100
 
     $imgDeployActive.Source = "$Script:ScriptFolder\Resources\DeployActive.png"
     $imgDeployInactive.Source = "$Script:ScriptFolder\Resources\DeployInactive.png"
@@ -917,7 +1018,7 @@ function GenerateForm {
     $imgScriptInactive.Source = "$Script:ScriptFolder\Resources\ScriptInactive.png"
     $imgRefreshUnits.Source = "$Script:ScriptFolder\Resources\btnRefresh.png"
     $imgRefreshScripts.Source = "$Script:ScriptFolder\Resources\btnRefresh.png"
-    $imgAzCLIBulb.Source = "$Script:ScriptFolder\Resources\bulbyellow.png"
+    $imgAzCLIBulb.Source = "$Script:ScriptFolder\Resources\bulbred.png"
 
     $script:SelectedTenantName = $cbTenant.SelectedItem.Content
     $script:SelectedTenantID = $cbTenant.SelectedItem.Tag
@@ -1007,8 +1108,8 @@ function GenerateForm {
     }
 
     $btnLogin_Click = {
-    if ($btnLogin.Content -eq "login")
-    {
+        if ($btnLogin.Content -eq "login")
+        {
             if ($tbLoginUser.Text -eq "")
             {
                 $logstring = "Please provide a valid account for the Azure login"
@@ -1335,6 +1436,141 @@ function GenerateForm {
 
     $AMHWindow_Closing = { 
         LogoutCleanup 
+    }
+
+    $exAzCliCred_Expanded = {
+        ToggleAzCliExpander -expander $exAzCliCred
+    }
+
+    $exAzCliSP_Expanded = {
+        ToggleAzCliExpander -expander $exAzCliSP
+    }
+
+    $exAzCliMI_Expanded = {
+        ToggleAzCliExpander -expander $exAzCliMI
+    }
+
+    $btnAzCliCancel_Click = {
+        Add-LogEntry -LogEntry "Azure Cli login is cancelled" -Severity Info
+        $script:AzCliLogin.Close()
+    }
+
+    $btnAzCliLogin_Click = {
+        $error.Clear()
+        switch ($script:CliLoginType)
+        {
+        'CR'{
+                If (($null -ne $txtUsernameCred.text) -and ($null -ne $pwbUserPassword.Password))
+                {
+                    try
+                    {
+                        $AzCliLogin = az login -u $($txtUsernameCred.text) -p $($pwbUserPassword.Password) | ConvertFrom-Json
+                    }
+                    catch [NativeCommandError]
+                    {
+                        Clear-Host
+                        $script:CliLogin = $false
+                        $logstring = $Error[0].Exception.Message
+                        $logstring += "Login with credentials NOT successfull"
+                        Add-LogEntry -LogEntry $logstring -Severity Warning
+                        $imgAzCLIBulb.Source = "$Script:ScriptFolder\Resources\bulbyellow.png"
+                        $imgAzCLIBulbCR.Source = "$Script:ScriptFolder\Resources\bulbyellow.png"
+                    }
+                    catch
+                    {
+                        $script:CliLogin = $false
+                    }
+                }
+                if (($error.Count -eq 0) -and ($AzCliLogin))
+                {
+                    $script:CliLogin = $true
+                    Add-LogEntry -LogEntry "Azure Cli login with credentials successfull" -Severity Info
+                    $imgAzCLIBulb.Source = "$Script:ScriptFolder\Resources\bulbgreen.png"
+                    $imgAzCLIBulbCR.Source = "$Script:ScriptFolder\Resources\bulbgreen.png"
+                }
+                break
+            }
+        'SP'{
+                If (($null -ne $txtSPnameCred.text) -and ($null -ne $pwbSPPassword.Password))
+                {                        
+                    try
+                    {
+                        $AzCliLogin = az login --service-principal -u $txtSPnameCred.text -p $pwbSPPassword.Password --tenant $txtSPTenantName.text
+                    }
+                    catch [NativeCommandError]
+                    {
+                        $script:CliLogin = $false
+                        $logstring = $Error[0].Exception.Message
+                        $logstring += "Login with service principal NOT successfull"
+                        Add-LogEntry -LogEntry $logstring -Severity Warning
+                        $imgAzCLIBulb.Source = "$Script:ScriptFolder\Resources\bulbyellow.png"
+                        $imgAzCLIBulbSP.Source = "$Script:ScriptFolder\Resources\bulbyellow.png"
+                    }
+                    catch
+                    {
+                        $script:CliLogin = $false
+                        Add-LogEntry -LogEntry "Azure Cli login with service principal NOT successfull" -Severity Warning
+                        $imgAzCLIBulb.Source = "$Script:ScriptFolder\Resources\bulbyellow.png"
+                    }
+                }
+                if (($error.Count -eq 0) -and ($AzCliLogin))
+                {
+                    $script:CliLogin = $true
+                    Add-LogEntry -LogEntry "Azure Cli login with service principal successfull" -Severity Info
+                    $imgAzCLIBulb.Source = "$Script:ScriptFolder\Resources\bulbgreen.png"
+                    $imgAzCLIBulbSP.Source = "$Script:ScriptFolder\Resources\bulbgreen.png"
+                }
+                break
+            }
+        'MI'{
+                If ($null -ne $txtMIDName.text)
+                {          
+                    try
+                    {
+                        $AzCliLogin = az login --identity --username $txtMIDName.text
+                    }
+                    catch [NativeCommandError]
+                    {
+                        Clear-Host
+                        $script:CliLogin = $false
+                        $logstring = $Error[0].Exception.Message
+                        $logstring += "Login with managed identity NOT successfull"
+                        Add-LogEntry -LogEntry $logstring -Severity Warning
+                        $imgAzCLIBulb.Source = "$Script:ScriptFolder\Resources\bulbyellow.png"
+                        $imgAzCLIBulbMI.Source = "$Script:ScriptFolder\Resources\bulbyellow.png"
+                    }
+                    catch
+                    {
+                        $script:CliLogin = $false
+                    }
+                }
+                if (($error.Count -eq 0) -and ($AzCliLogin))
+                {
+                    $script:CliLogin = $true
+                    Add-LogEntry -LogEntry "Azure Cli login with managed identity successfull" -Severity Info
+                    $imgAzCLIBulb.Source = "$Script:ScriptFolder\Resources\bulbgreen.png"
+                    $imgAzCLIBulbMI.Source = "$Script:ScriptFolder\Resources\bulbgreen.png"
+                }
+                break
+            }
+        }
+    }
+
+    $imgAzCLIBulbCR_MouseLeftButtonDown = {
+        LogoutAzCli
+    }
+
+    $imgAzCLIBulbSP_MouseLeftButtonDown = {
+        LogoutAzCli
+    }
+
+    $imgAzCLIBulbMI_MouseLeftButtonDown = {
+        LogoutAzCli
+    }
+
+    $imgAzCLIBulb_MouseLeftButtonDown = {
+        InitializeAzCliForm
+        GenerateAzCliForm
     }
 
 #endregion Eventhandling

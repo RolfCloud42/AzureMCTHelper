@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
         mc:Ignorable="d"
-        Name="AMHWindow" Width="1024" Height="800" SizeToContent="Manual"  HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" FontSize="11">
+        Name="AMHWindow" Width="1024" Height="800" SizeToContent="Manual" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" FontSize="11">
     <Window.Resources>
         <Color x:Key="SolidColorBrushColor">Silver</Color>
     </Window.Resources>
@@ -97,7 +97,7 @@
                 <TabItem Name="tabAzureCLI" MinHeight="30" FontSize="11">
                     <TabItem.Header>
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="Azure CLI"  VerticalAlignment="Center"/>
+                            <TextBlock Text="Azure CLI "  VerticalAlignment="Center"/>
                             <Image Name="imgAzCLIBulb" HorizontalAlignment="Center" Height="30" VerticalAlignment="Center" Visibility="Visible"/>
                         </StackPanel>
                     </TabItem.Header>
