@@ -50,7 +50,7 @@ Add-Type -AssemblyName PresentationFramework # needed when starting the script f
     # all of these values can be configured within $Script:ScriptFolder\Resources\settings.json
     if ($script:UseSettingsJSON -eq $false)
     {
-        $script:formCaption = 'Azure MCT Helper v0.7'
+        $script:formCaption = 'Azure MCT Helper v0.9'
         $script:workdir = "$Script:ScriptFolder\Units"
         $script:SkipAzModuleStatus = $true
         $script:DefaultTenant = ""
@@ -194,7 +194,6 @@ function Find-AzureCLI {
 
     If ($script:AzCliIsInstalled) 
     {
-        #$tabAzureCLI.Visibility = "Visible"
         $imgAzCLIBulb.Source = "$Script:ScriptFolder\Resources\bulbyellow.png"
         $imgAzCLIBulb.Tooltip = "Select the icon to login with Azure CLI."
     }
@@ -430,7 +429,6 @@ function FillUnitLB {
         $UnitNewListBoxItem.Name = "btnUnit$(($_.Name).Split("-")[0])"
         $ButtonName = $UnitNewListBoxItem.Name
         $UnitNewListBoxItem.Content = "$(($_.Name).Split("-")[1])"
-        #$UnitNewListBoxItem.MinWidth = "200"
         $UnitNewListBoxItem.MinHeight = "30"
         $UnitNewListBoxItem.Padding = "5,1,5,2"
         $UnitNewListBoxItem.Margin = "0,5,0,3"
@@ -559,10 +557,6 @@ function FillUnitPowerShell {
         {
             $azurescript = ReplaceScriptVariables -script2replace $azurescript
         }
-        #else
-        #{
-        #    $azurescript = $azurescript
-        #}
         Foreach ($line in $azurescript)
         {
             $pScript = New-Object -TypeName System.Windows.Documents.Paragraph
@@ -590,10 +584,6 @@ function FillUnitAzureCLI {
         {
             $azurescript = ReplaceScriptVariables -script2replace $azurescript
         }
-        #else
-        #{
-        #    $azurescript = $azurescript
-        #}
         Foreach ($line in $azurescript)
         {
             $aScript = New-Object -TypeName System.Windows.Documents.Paragraph
@@ -638,7 +628,22 @@ function ActivateActionPane ($UnitName,$UnitFolder) {
     ToggleDeployButtons
 } # end function ActivateActionPane
 
-function ToggleReplaceVarCbx ($tabname) { # needs work
+function DeployScript ($UnitScript) {
+
+        $logstring = "Deploying with script: $UnitScript"
+        Add-LogEntry -LogEntry $logstring -Severity Info
+
+        $Script = Get-Content $UnitScript
+        if ($cbxVariableReplacement.IsChecked -eq $true)
+        {
+            $Script = ReplaceScriptVariables -line2replace $Script
+        }
+        $UnitScriptBlock = [scriptblock]::Create($Script)
+        $script:AzureOutput = Invoke-Command -ScriptBlock $UnitScriptBlock -WarningAction SilentlyContinue -ErrorAction SilentlyContinue
+        Add-Output
+    }
+
+function ToggleReplaceVarCbx ($tabname) {
 
     switch ($tabname)
     {
@@ -670,9 +675,7 @@ function ToggleReplaceVarCbx ($tabname) { # needs work
                 $cbxVariableReplacement.IsEnabled = $false
             }
         }
-    
     }
-
 } # end function ToggleReplaceVarCbx
 
 function ToggleDeployButtons ($Toggle) {
@@ -688,22 +691,22 @@ function ToggleDeployButtons ($Toggle) {
     {
         if (($null -ne $script:SelectedUnit) -and (Test-Path -Path $script:UnitFileDeploy))
         {
-        if ($script:logedin -eq $true)
-        {
-            $imgDeployActive.Visibility = "Visible"
-            $imgDeployInactive.Visibility = "Hidden"
+            if ($script:logedin -eq $true)
+            {
+                $imgDeployActive.Visibility = "Visible"
+                $imgDeployInactive.Visibility = "Hidden"
+            }
+            else
+            {
+                $imgDeployActive.Visibility = "Hidden"
+                $imgDeployInactive.Visibility = "Visible"
+            }
         }
         else
         {
             $imgDeployActive.Visibility = "Hidden"
-            $imgDeployInactive.Visibility = "Visible"
+            $imgDeployInactive.Visibility = "Hidden"
         }
-    }
-        else
-        {
-        $imgDeployActive.Visibility = "Hidden"
-        $imgDeployInactive.Visibility = "Hidden"
-    }
     }
 
     if (($null -ne $script:UnitFilePSScript) -or ($null -ne $script:UnitFileAZScript))
@@ -727,7 +730,6 @@ function ToggleDeployButtons ($Toggle) {
             $imgScriptInactive.Visibility = "Hidden"
         }
     }
-
     RefreshUI
 } # end function ToggleDeployButtons
 
@@ -848,6 +850,7 @@ function InitializeAzCliForm {
     try
     {
         # Test-Path will return true or false and that does not trigger an error if the file is not there
+        
         if (Test-Path -Path "$Script:ScriptFolder\Resources\AzCliLogin.xaml")
         {
             [XML]$script:AzCliXAML = (Get-Content $Script:ScriptFolder\Resources\AzCliLogin.xaml) -replace 'Page','Window'
@@ -923,6 +926,7 @@ function InitializeForm {
     try
     {
         # Test-Path will return true or false and that does not trigger an error if the file is not there
+        
         if (Test-Path -Path "$Script:ScriptFolder\Resources\MainWindow.xaml")
         {
             [XML]$script:XAML = (Get-Content $Script:ScriptFolder\Resources\MainWindow.xaml) -replace 'Page','Window'
@@ -977,7 +981,7 @@ function GenerateForm {
     $btnRGCreate.Add_Click($btnRGCreate_Click)
     
     $imgDeployActive.Add_MouseLeftButtonDown($deploytemplate)
-    $imgScriptActive.Add_MouseLeftButtonDown($deployPSscript)
+    $imgScriptActive.Add_MouseLeftButtonDown($DeployUnitScript)
     
     $sliderSize.Add_ValueChanged($sizeValueChanged)
     $cbxVariableReplacement.Add_Unchecked($cbxVariableReplacement_Unchecked)
@@ -1057,7 +1061,6 @@ function GenerateForm {
         {
              $exContextOpen.IsExpanded = $true
         }
-        
     }
 
     $exContextOpen_MouseLeave = {
@@ -1119,7 +1122,6 @@ function GenerateForm {
             {
                 if (($tbLoginUser.Text -match "@outlook.") -or ($tbLoginUser.Text -match "@live.") -or ($tbLoginUser.Text -match "@xbox.") -or ($tbLoginUser.Text -match "@hotmail.")) 
                 {
-
                     $error.Clear()
                     try
                     {
@@ -1148,7 +1150,6 @@ function GenerateForm {
                         $logstring = "Cannot log in with work or school account $($tbLoginUser.Text)"
                         Add-LogEntry -LogEntry $logstring -Severity Error
                     }
-                    
                 }
                 If ($error.Count -eq 0)
                 {
@@ -1360,7 +1361,6 @@ function GenerateForm {
     }
 
     $deploytemplate = {
-
         $logstring = "Deploying with script: $script:UnitFileDeploy"
         Add-LogEntry -LogEntry $logstring -Severity Info
         
@@ -1402,32 +1402,8 @@ function GenerateForm {
         Add-Output
     }
 
-    $deployPSscript = {
-        $logstring = "Deploying with script: $script:UnitFilePSScript"
-        Add-LogEntry -LogEntry $logstring -Severity Info
-
-        $PSscript = Get-Content $script:UnitFilePSScript
-        if ($cbxVariableReplacement.IsChecked -eq $true)
-        {
-            $PSscript = ReplaceScriptVariables -line2replace $PSscript
-        }
-        $PSScriptBlock = [scriptblock]::Create($PSscript)
-        $script:AzureOutput = Invoke-Command -ScriptBlock $PSScriptBlock -WarningAction SilentlyContinue -ErrorAction SilentlyContinue
-        Add-Output
-    }
-
-    $deployAZscript = {
-        $logstring = "Deploying with script: $script:UnitFileAZScript"
-        Add-LogEntry -LogEntry $logstring -Severity Info
-
-        $AZscript = Get-Content $script:UnitFileAZScript
-        if ($cbxVariableReplacement.IsChecked -eq $true)
-        {
-            $AZscript = ReplaceScriptVariables -line2replace $AZscript
-        }
-        $AZScriptBlock = [scriptblock]::Create($AZscript)
-        $script:AzureOutput = Invoke-Command -ScriptBlock $AZScriptBlock -WarningAction SilentlyContinue -ErrorAction SilentlyContinue
-        Add-Output
+    $DeployUnitScript = {
+        DeployScript -UnitScript $script:UnitFilePSScript
     }
 
     $sizeValueChanged = {

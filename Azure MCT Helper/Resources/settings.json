@@ -4,16 +4,17 @@
         "formCaption": "Azure MCT Helper v0.9",
         "workdir": "Units",
         "SkipAzModuleStatus": false,
-        "DefaultTenant": "Contoso Training (Demo)",
+        "DefaultTenant": "Contoso Training",
         "DefaultSubscription": "Azure Pass",
         "DefaultRegion": "northeurope",
         "DefaultRegionLong": "North Europe",
         "DefaultResourceGroup": "AzClass",
-        "DefaultAccount": "0"
+        "DefaultAccount": "1",
+        "DefaultEditor": "0"
         },
     "tenants": [
         {
-            "Name": "Contoso Training (Demo)",
+            "Name": "Contoso Training",
             "ID": "12345678-1234-5678-abcd-12345678abcd"
         },
         {
@@ -24,5 +25,10 @@
     "accounts": [
         "rolf@contosodemo.com",
         "rolf@contoso.com"
+    ],
+    "editors": [
+        "code",
+        "ise",
+        "notepad"
     ]
 }
