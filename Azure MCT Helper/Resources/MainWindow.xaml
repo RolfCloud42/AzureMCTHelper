@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
         mc:Ignorable="d"
-        Name="AMHWindow" Width="1024" Height="800" SizeToContent="Manual" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" FontSize="11">
+        Name="AMHWindow" Width="1024" Height="800" SizeToContent="Manual" FontSize="11">
     <Window.Resources>
         <Color x:Key="SolidColorBrushColor">Silver</Color>
     </Window.Resources>
@@ -39,7 +39,20 @@
         </Expander>
 
         <StackPanel Name="spUnits" Orientation="Vertical" Grid.Column="1" Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-            <ListBox Name="lbUnits" HorizontalContentAlignment="Stretch" HorizontalAlignment="Stretch" VerticalContentAlignment="Stretch" VerticalAlignment="Stretch" Margin="5,5,5,5" FontSize="11" BorderThickness="2,2,2,2"/>
+            <StackPanel Name="spFilterUnits" Orientation="Horizontal" VerticalAlignment="Center">
+                <TextBox Name="tbFilterUnits" MinHeight="30" MinWidth="160" HorizontalAlignment="Left" VerticalContentAlignment="Center" FontSize="11" Margin="5,5,5,5"/>
+                <Label Name="lblFilterUnitsClear" Content="X" Height="45" Width="30" HorizontalAlignment="Left" VerticalContentAlignment="Top" FontSize="26" VerticalAlignment="Top" Margin="0,-5,0,0"/>
+            </StackPanel>
+            <ListBox Name="lbUnits" HorizontalContentAlignment="Stretch" HorizontalAlignment="Stretch" VerticalContentAlignment="Stretch" VerticalAlignment="Stretch" Margin="5,5,5,5" FontSize="11" BorderThickness="2,2,2,2">
+                <ListBox.Resources>
+                    <Style TargetType="Button">
+                        <Setter Property="MinHeight" Value="30" />
+                        <Setter Property="Padding" Value="5,1,5,2" />
+                        <Setter Property="Margin" Value="0,5,0,3" />
+                        <Setter Property="HorizontalAlignment" Value="Stretch" />
+                    </Style>
+                </ListBox.Resources>
+            </ListBox>
             <StackPanel Name="spRefreshUnits" Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Center">
                 <Image Name="imgRefreshUnits" Width="20" Height="20" Margin="5,5,5,5" ToolTip="Refresh the unit list" >
                     <Image.Effect>

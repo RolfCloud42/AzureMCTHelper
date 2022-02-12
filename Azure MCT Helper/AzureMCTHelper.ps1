@@ -79,8 +79,6 @@ function Add-LogEntry {
         $Severity
     )
 
-    #$tbStatusMessage.Text = $StatusMessage
-
     If ([Array]$script:OldLogEntry -ne [Array]$LogEntry) {
     
         Foreach ($line in $LogEntry)
@@ -424,24 +422,23 @@ function FillUnitLB {
         Add-LogEntry -LogEntry $logstring -Severity Info    
     }
 
-    Get-ChildItem -Path $script:workdir | ForEach-Object {
+    $UnitList = Get-ChildItem -Path $script:workdir
+    $script:UnitBtnSource = [System.Collections.Generic.List[System.Windows.Controls.Button]]::new()
+
+    for ($UnitCount = 0;$UnitCount -le $UnitList.Count - 1;$UnitCount++) {
         $UnitNewListBoxItem = New-Object -TypeName System.Windows.Controls.Button
-        $UnitNewListBoxItem.Name = "btnUnit$(($_.Name).Split("-")[0])"
+        $UnitNewListBoxItem.Name = "btnUnit$($UnitCount + 1)"
         $ButtonName = $UnitNewListBoxItem.Name
-        $UnitNewListBoxItem.Content = "$(($_.Name).Split("-")[1])"
-        $UnitNewListBoxItem.MinHeight = "30"
-        $UnitNewListBoxItem.Padding = "5,1,5,2"
-        $UnitNewListBoxItem.Margin = "0,5,0,3"
-        $UnitNewListBoxItem.HorizontalAlignment = "Stretch"
-        $UnitNewListBoxItem.Tag = $_.FullName
-
+        $UnitNewListBoxItem.Content = $UnitList[$UnitCount].Name
+        $UnitNewListBoxItem.Tag = $UnitList[$UnitCount].FullName
         $btnUnitScriptblock = CreateUnitScriptBlock -UnitName $ButtonName -UnitFolder "$($UnitNewListBoxItem.Tag)"
-
-        $lbUnits.Items.Add($UnitNewListBoxItem) | Out-Null
         $UnitNewListBoxItem.Add_Click($btnUnitScriptblock)
 
+        $script:UnitBtnSource.Add($UnitNewListBoxItem)
         $script:AllControls.Add($UnitNewListBoxItem)
-    } 
+    }
+    $lbUnits.ItemsSource = $script:UnitBtnSource
+    $script:UnitBtnFilteredSource = [System.Collections.Generic.List[System.Windows.Controls.Button]]::new()
 } # end function FillUnitLB
 
 function FillUnitInfo {
@@ -606,6 +603,10 @@ function ActivateActionPane ($UnitName,$UnitFolder) {
     {
         $script:UnitFileDeploy = "$script:SelectedUnitFolder\azuredeploy.json.github.txt"
     }
+    else
+    {
+        $script:UnitFileDeploy = $null
+    }
 
     if (Test-path -Path "$script:SelectedUnitFolder\azuredeploy.parameters.json")
     {
@@ -615,10 +616,28 @@ function ActivateActionPane ($UnitName,$UnitFolder) {
     {
         $script:UnitFileParameter = "$script:SelectedUnitFolder\azuredeploy.parameters.json.github.txt"
     }
+    else
+    {
+        $script:UnitFileParameter = $null
+    }
     
-    $script:UnitFilePSScript = "$script:SelectedUnitFolder\azurescript.ps1"
-
-    $script:UnitFileAZScript = "$script:SelectedUnitFolder\azurescript.sh"
+    if (Test-path -Path "$script:SelectedUnitFolder\azurescript.ps1")
+    {
+        $script:UnitFilePSScript = "$script:SelectedUnitFolder\azurescript.ps1"
+    }
+    else
+    {
+        $script:UnitFilePSScript = $null
+    }
+    
+    if (Test-path -Path "$script:SelectedUnitFolder\azurescript.sh")
+    {
+        $script:UnitFileAZScript = "$script:SelectedUnitFolder\azurescript.sh"
+    }
+    else
+    {
+        $script:UnitFileAZScript = $null
+    }
     
     FillUnitInfo
     FillUnitTemplate
@@ -711,7 +730,7 @@ function ToggleDeployButtons ($Toggle) {
 
     if (($null -ne $script:UnitFilePSScript) -or ($null -ne $script:UnitFileAZScript))
     {
-        if ((($null -ne $script:SelectedUnit) -and (Test-Path -Path $script:UnitFilePSScript)) -or (($null -ne $script:SelectedUnit) -and (Test-Path -Path $script:UnitFileAZScript)))
+        if ($null -ne $script:SelectedUnit) 
         {
             if ($script:logedin -eq $true)
             {
@@ -996,6 +1015,8 @@ function GenerateForm {
     $lblRefreshUnits.Add_MouseEnter($lblRefreshUnits_MouseEnter)
     $lblRefreshUnits.Add_MouseLeave($lblRefreshUnits_MouseLeave)
     $lblRefreshUnits.Add_MouseLeftButtonDown($refreshUnitsList_MouseLeftButtonDown)
+    $tbFilterUnits.Add_TextChanged($tbFilterUnits_TextChanged)
+    $lblFilterUnitsClear.Add_MouseLeftButtonDown($lblFilterUnitsClear_MouseLeftButtonDown)
 
     $tabPowerShell.Add_GotFocus($tabPowerShell_GotFocus)
     $tabAzureCLI.Add_GotFocus($tabAzureCLI_GotFocus)
@@ -1262,8 +1283,36 @@ function GenerateForm {
         }
     }
 
+    $tbFilterUnits_TextChanged = {
+        $lbUnits.ItemsSource = $null
+        $script:UnitBtnFilteredSource.Clear()
+
+        ForEach ($UnitBtn in $script:UnitBtnSource) 
+        {
+            If ($UnitBtn.Content -match $tbFilterUnits.Text) 
+            {
+                $script:UnitBtnFilteredSource.Add($UnitBtn)
+            }
+        }
+
+        If ([string]::IsNullOrEmpty($tbFilterUnits.Text))
+        {
+            $lbUnits.ItemsSource = $script:UnitBtnSource
+        }
+        else
+        {
+            $lbUnits.ItemsSource = $script:UnitBtnFilteredSource
+        }
+    }
+
+    $lblFilterUnitsClear_MouseLeftButtonDown = {
+        $tbFilterUnits.Text = ""
+        RefreshUI
+    }
+
     $refreshUnitsList_MouseLeftButtonDown = {
         $imgRefreshUnits.Effect = $null
+        $tbFilterUnits.Text = ""
         FillUnitLB
     }
 
@@ -1403,7 +1452,14 @@ function GenerateForm {
     }
 
     $DeployUnitScript = {
-        DeployScript -UnitScript $script:UnitFilePSScript
+        If ($tabPowerShell.IsSelected -eq $true)
+        {
+            DeployScript -UnitScript $script:UnitFilePSScript
+        }
+        If ($tabAzureCLI.IsSelected -eq $true)
+        {
+            DeployScript -UnitScript $script:UnitFileAZScript
+        }
     }
 
     $sizeValueChanged = {
