@@ -79,8 +79,8 @@ function Add-LogEntry {
         $Severity
     )
 
-    If ([Array]$script:OldLogEntry -ne [Array]$LogEntry) {
-    
+    If ([Array]$script:OldLogEntry -ne [Array]$LogEntry)
+    {
         Foreach ($line in $LogEntry)
         {
             switch ($Severity)
@@ -141,22 +141,19 @@ function Add-Module ($module) {
     if ($script:AzModuleInstalled -eq $false)
     {
         $Modulstate = $false
-        # If module is imported do nothing
-        if (Get-Module -Name $module) {
+        if (Get-Module -Name $module) { # If module is imported do nothing
             $Modulstate = $true 
             $logstring = "Module $module loaded"
             Add-LogEntry -LogEntry $logstring -Severity Info
         }
         else {
-            # If module is not imported, but available on disk then import
-            if ((Get-Module -ListAvailable).Name -eq $module) {
+            if ((Get-Module -ListAvailable).Name -eq $module) { # If module is not imported, but available on disk then import
                 Import-Module -Name $module
                 $Modulstate = $true
                 $logstring = "Module $module imported"
                 Add-LogEntry -LogEntry $logstring -Severity Info
             }
-            else {
-                # If module is not imported, not available on disk, but is in online gallery then install and import
+            else { # If module is not imported, not available on disk, but is in online gallery then install and import
                 if (Find-Module -Name $module) {
                     $logstring = "Module $module is not imported, not available on disk, but is in the online gallery. Installation and import will take a while"
                     Add-LogEntry -LogEntry $logstring -Severity Warning
@@ -168,8 +165,7 @@ function Add-Module ($module) {
                     Add-LogEntry -LogEntry $logstring -Severity Info
                     
                 }
-                else {
-                    # If module is not imported, not available and not in online gallery then abort
+                else {# If module is not imported, not available and not in online gallery then abort
                     $logstring = "Module $module not imported, not available and not in online gallery, exiting advised."
                     Add-LogEntry -LogEntry $logstring -Severity Error
                 }
@@ -249,7 +245,6 @@ $UBlock =
 } # end CreateUnitScriptBlock
 
 function FillTenantCB {
-
     $logstring = "filling tenant list"
     Add-LogEntry -LogEntry $logstring -Severity Info
 
@@ -282,12 +277,9 @@ function FillTenantCB {
     }
     $script:SelectedTenantName = $cbTenant.SelectedItem.Content
     $script:SelectedTenantID = $cbTenant.SelectedItem.Tag
-
-
 } # end function FillTenantCB
 
 function FillSubscriptionCB {
-
     $logstring = "filling subscription list"
     Add-LogEntry -LogEntry $logstring -Severity Info
     $script:subscriptions = $null
@@ -337,7 +329,6 @@ function FillSubscriptionCB {
 } # end function FillSubscriptionCB
 
 function FillRegionCB {
-
     $logstring = "filling regions list"
     Add-LogEntry -LogEntry $logstring -Severity Info
     $script:regions = $null
@@ -347,7 +338,6 @@ function FillRegionCB {
     $script:regions = Get-AzLocation | Sort-Object -Property DisplayName #Select-Object Location,DisplayName | 
     $cbRegion.IsEnabled = $true
     $btnRGCreate.IsEnabled = $false
-    
     RefreshUI
 
     Foreach ($region in $script:regions)
@@ -369,7 +359,6 @@ function FillRegionCB {
 } # end function FillRegionCB
 
 function FillResourceGroupCB {
-
     $logstring = "filling resource group list"
     Add-LogEntry -LogEntry $logstring -Severity Info
     $script:ResourceGroups = $null
@@ -648,7 +637,6 @@ function ActivateActionPane ($UnitName,$UnitFolder) {
 } # end function ActivateActionPane
 
 function DeployScript ($UnitScript) {
-
         $logstring = "Deploying with script: $UnitScript"
         Add-LogEntry -LogEntry $logstring -Severity Info
 
@@ -663,7 +651,6 @@ function DeployScript ($UnitScript) {
     }
 
 function ToggleReplaceVarCbx ($tabname) {
-
     switch ($tabname)
     {
     'PS' {
@@ -755,33 +742,33 @@ function ToggleDeployButtons ($Toggle) {
 function ToggleAzCliExpander ($expander) {
     switch ($expander.Name)
     {
-        'exAzCliCred'  {
-                            $exAzCliSP.IsExpanded = $false
-                            $exAzCliMI.IsExpanded = $false
-                            $rbAzCliCR.IsChecked = $true
-                            $rbAzCliSP.IsChecked = $false
-                            $rbAzCliMI.IsChecked = $false
-                            $script:CliLoginType = "CR"
-                            break
-                        }
-        'exAzCliSP'    {
-                            $exAzCliCred.IsExpanded = $false
-                            $exAzCliMI.IsExpanded = $false
-                            $rbAzCliCR.IsChecked = $false
-                            $rbAzCliSP.IsChecked = $true
-                            $rbAzCliMI.IsChecked = $false
-                            $script:CliLoginType = "SP"
-                            break
-                        }
-        'exAzCliMI'    {
-                            $exAzCliCred.IsExpanded = $false
-                            $exAzCliSP.IsExpanded = $false
-                            $rbAzCliCR.IsChecked = $false
-                            $rbAzCliSP.IsChecked = $false
-                            $rbAzCliMI.IsChecked = $true
-                            $script:CliLoginType = "MI"
-                            break
-                        }
+    'exAzCliCred'  {
+                    $exAzCliSP.IsExpanded = $false
+                    $exAzCliMI.IsExpanded = $false
+                    $rbAzCliCR.IsChecked = $true
+                    $rbAzCliSP.IsChecked = $false
+                    $rbAzCliMI.IsChecked = $false
+                    $script:CliLoginType = "CR"
+                    break
+                   }
+    'exAzCliSP'    {
+                    $exAzCliCred.IsExpanded = $false
+                    $exAzCliMI.IsExpanded = $false
+                    $rbAzCliCR.IsChecked = $false
+                    $rbAzCliSP.IsChecked = $true
+                    $rbAzCliMI.IsChecked = $false
+                    $script:CliLoginType = "SP"
+                    break
+                   }
+    'exAzCliMI'    {
+                    $exAzCliCred.IsExpanded = $false
+                    $exAzCliSP.IsExpanded = $false
+                    $rbAzCliCR.IsChecked = $false
+                    $rbAzCliSP.IsChecked = $false
+                    $rbAzCliMI.IsChecked = $true
+                    $script:CliLoginType = "MI"
+                    break
+                   }
     }
 } # end function ToggleAzCliExpander 
 
@@ -869,7 +856,6 @@ function InitializeAzCliForm {
     try
     {
         # Test-Path will return true or false and that does not trigger an error if the file is not there
-        
         if (Test-Path -Path "$Script:ScriptFolder\Resources\AzCliLogin.xaml")
         {
             [XML]$script:AzCliXAML = (Get-Content $Script:ScriptFolder\Resources\AzCliLogin.xaml) -replace 'Page','Window'
@@ -945,7 +931,6 @@ function InitializeForm {
     try
     {
         # Test-Path will return true or false and that does not trigger an error if the file is not there
-        
         if (Test-Path -Path "$Script:ScriptFolder\Resources\MainWindow.xaml")
         {
             [XML]$script:XAML = (Get-Content $Script:ScriptFolder\Resources\MainWindow.xaml) -replace 'Page','Window'
@@ -1092,43 +1077,43 @@ function GenerateForm {
     }
 
     $btnAzureModule_Click = {
-    If ($script:SkipAzModuleStatus -eq $false)
-    {
-        $logstring = "verifying Azure module installation status"
-        Add-LogEntry -LogEntry $logstring -Severity Info
-        $btnAzureModule.Content = "verifying..."
-        RefreshUI
-        $logstring = "Installing Azure module"
-        Add-LogEntry -LogEntry $logstring -Severity Info
-        Add-Module -module Az
-        if ($script:AzModuleInstalled -eq $true)
+        If ($script:SkipAzModuleStatus -eq $false)
         {
-            $lblAzureModuleStatus.Content = "installed"
+            $logstring = "verifying Azure module installation status"
+            Add-LogEntry -LogEntry $logstring -Severity Info
+            $btnAzureModule.Content = "verifying..."
+            RefreshUI
+            $logstring = "Installing Azure module"
+            Add-LogEntry -LogEntry $logstring -Severity Info
+            Add-Module -module Az
+            if ($script:AzModuleInstalled -eq $true)
+            {
+                $lblAzureModuleStatus.Content = "installed"
+                $btnAzureModule.Content = "Verify"
+                $btnAzureModule.IsEnabled = $false
+                $cbTenant.IsEnabled = $true
+                $btnLogin.IsEnabled = $true
+                RefreshUI
+            }
+            else
+            {   
+                $logstring = "Azure module not installed"
+                Add-LogEntry -LogEntry $logstring -Severity Warning
+                $lblAzureModuleStatus.Content = "not installed"}
+            }
+        elseif ($script:SkipAzModuleStatus -eq $true)
+        {
+            $logstring = "Azure module installation status skipped"
+            Add-LogEntry -LogEntry $logstring -Severity Info
+            $script:AzModuleInstalled = $true
+            $lblAzureModuleStatus.Content = "skipped"
             $btnAzureModule.Content = "Verify"
             $btnAzureModule.IsEnabled = $false
             $cbTenant.IsEnabled = $true
             $btnLogin.IsEnabled = $true
             RefreshUI
         }
-        else
-        {   
-            $logstring = "Azure module not installed"
-            Add-LogEntry -LogEntry $logstring -Severity Warning
-            $lblAzureModuleStatus.Content = "not installed"}
-        }
-    elseif ($script:SkipAzModuleStatus -eq $true)
-    {
-        $logstring = "Azure module installation status skipped"
-        Add-LogEntry -LogEntry $logstring -Severity Info
-        $script:AzModuleInstalled = $true
-        $lblAzureModuleStatus.Content = "skipped"
-        $btnAzureModule.Content = "Verify"
-        $btnAzureModule.IsEnabled = $false
-        $cbTenant.IsEnabled = $true
-        $btnLogin.IsEnabled = $true
         RefreshUI
-    }
-    RefreshUI
     }
 
     $btnLogin_Click = {
@@ -1195,7 +1180,6 @@ function GenerateForm {
                 else
                 {
                     $script:logedin = $false
-                    #$tbsbiCenter2.Text = ""
                     $logstring = "Error while logging in $($tbLoginUser.Text) to $script:SelectedTenantName"
                     Add-LogEntry -LogEntry $logstring -Severity Error
                 }
@@ -1559,21 +1543,40 @@ function GenerateForm {
                 {          
                     try
                     {
-                        $AzCliLogin = az login --identity --username $txtMIDName.text
+                        $script:MITest = $null
+                        $uri = "http://169.254.169.254/metadata/instance?api-version=2021-02-01"
+                        $script:MITest = Invoke-RestMethod -Method GET -Uri $uri -Headers @{"Metadata"="True"} -ErrorAction SilentlyContinue -WarningAction SilentlyContinue
                     }
-                    catch [NativeCommandError]
+                    catch [WebCmdletWebResponseException]
                     {
-                        Clear-Host
-                        $script:CliLogin = $false
-                        $logstring = $Error[0].Exception.Message
-                        $logstring += "Login with managed identity NOT successfull"
-                        Add-LogEntry -LogEntry $logstring -Severity Warning
-                        $imgAzCLIBulb.Source = "$Script:ScriptFolder\Resources\bulbyellow.png"
-                        $imgAzCLIBulbMI.Source = "$Script:ScriptFolder\Resources\bulbyellow.png"
+                        $logstring = "Azure Instance Metadata Service cannot be reached. Login with a managed identity is not possible."
+                        Add-LogEntry -LogEntry $logstring -Severity Info
                     }
-                    catch
+                    If ($script:MITest.compute.azEnvironment -eq "AzurePublicCloud") 
                     {
-                        $script:CliLogin = $false
+                        try
+                        {
+                            $AzCliLogin = az login --identity --username $txtMIDName.text
+                        }
+                        catch [NativeCommandError]
+                        {
+                            Clear-Host
+                            $script:CliLogin = $false
+                            $logstring = $Error[0].Exception.Message
+                            $logstring += "Login with managed identity NOT successfull"
+                            Add-LogEntry -LogEntry $logstring -Severity Warning
+                            $imgAzCLIBulb.Source = "$Script:ScriptFolder\Resources\bulbyellow.png"
+                            $imgAzCLIBulbMI.Source = "$Script:ScriptFolder\Resources\bulbyellow.png"
+                        }
+                        catch
+                        {
+                            $script:CliLogin = $false
+                        }
+                    }
+                    else
+                    {
+                        $logstring = "Login with a managed identity is not possible."
+                        Add-LogEntry -LogEntry $logstring -Severity Info
                     }
                 }
                 if (($error.Count -eq 0) -and ($AzCliLogin))

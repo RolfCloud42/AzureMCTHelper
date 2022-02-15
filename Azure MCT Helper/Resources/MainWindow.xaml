@@ -41,7 +41,7 @@
         <StackPanel Name="spUnits" Orientation="Vertical" Grid.Column="1" Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
             <StackPanel Name="spFilterUnits" Orientation="Horizontal" VerticalAlignment="Center">
                 <TextBox Name="tbFilterUnits" MinHeight="30" MinWidth="160" HorizontalAlignment="Left" VerticalContentAlignment="Center" FontSize="11" Margin="5,5,5,5"/>
-                <Label Name="lblFilterUnitsClear" Content="X" Height="45" Width="30" HorizontalAlignment="Left" VerticalContentAlignment="Top" FontSize="26" VerticalAlignment="Top" Margin="0,-5,0,0"/>
+                <Label Name="lblFilterUnitsClear" Content="X" Height="45" Width="30" HorizontalAlignment="Left" VerticalContentAlignment="Top" FontSize="26" VerticalAlignment="Top" Margin="0,-5,0,0" ToolTip="Clear search"/>
             </StackPanel>
             <ListBox Name="lbUnits" HorizontalContentAlignment="Stretch" HorizontalAlignment="Stretch" VerticalContentAlignment="Stretch" VerticalAlignment="Stretch" Margin="5,5,5,5" FontSize="11" BorderThickness="2,2,2,2">
                 <ListBox.Resources>
