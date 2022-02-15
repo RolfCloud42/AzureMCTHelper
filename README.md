@@ -9,6 +9,10 @@ PowerShell script with WPF GUI for easy usage of Azure tasks during training
 Do not use this script in production unless you consider your training environment as production.
 The script is provided as is and no support or warranties are given.
 
+## What is the purpose of the tool?
+
+As a trainer, did you ever struggle to get the sample code written while you are teaching? Or did you ever have the feeling, that you are wasting your students time while they are watching you typing code? That is exactly what this tool try to help you with. Deployment at your fingertips no matter if it is a azuredeploy.json, a powershell or a bash script. All in one place without learning Azure DevOps and pipelines or other sophisticated deployment methods. Snippets of code ready for showing stuff during training.
+
 ## Installation of the Azure MCT Helper
 
 Place the script and its subfolders in any folder on your system. Make sure that the execution of PowerShell scripts is allowed for the account you are using. There are no administrative rights needed to run the script, although the installation of the Azure Az PowerShell module is required. The script will not work as intended without it. Optionally the installation of the Azure CLI module is required in case the unit contains shell files. Installation instructions for the Azure CLI can be found at the end of this document.
