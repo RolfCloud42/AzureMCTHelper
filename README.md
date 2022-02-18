@@ -11,13 +11,15 @@ The script is provided as is and no support or warranties are given.
 
 ## What is the purpose of the tool?
 
-As a trainer, did you ever struggle to get the sample code written while you are teaching? Or did you ever have the feeling, that you are wasting your students time while they are watching you typing code? That is exactly what this tool try to help you with. Deployment at your fingertips no matter if it is a azuredeploy.json, a powershell or a bash script. All in one place without learning Azure DevOps and pipelines or other sophisticated deployment methods. Snippets of code ready for showing stuff during training.
+As a trainer, did you ever struggle to get the sample code written while you are teaching? Or did you ever have the feeling, that you are wasting your students time while they are watching you typing code? That is exactly what this tool is trying to help you with. Deployment at your fingertips no matter if it is a azuredeploy.json, a powershell or a bash script. All in one place without learning Azure DevOps and pipelines or other sophisticated deployment methods. Snippets of code ready for showing stuff during training.
 
 ## Installation of the Azure MCT Helper
 
 Place the script and its subfolders in any folder on your system. Make sure that the execution of PowerShell scripts is allowed for the account you are using. There are no administrative rights needed to run the script, although the installation of the Azure Az PowerShell module is required. The script will not work as intended without it. Optionally the installation of the Azure CLI module is required in case the unit contains shell files. Installation instructions for the Azure CLI can be found at the end of this document.
 
 To install the Azure Az PowerShell module follow the instructions provided by Microsoft here: [https://docs.microsoft.com/powershell/azure/install-az-ps?view=azps-7.2.0](https://docs.microsoft.com/powershell/azure/install-az-ps?view=azps-7.2.0)
+
+If your PowerShell or Bash scripts require additional modules they need to installed and loaded before using them in the tool.
 
 ### Initial configuration
 
@@ -130,6 +132,8 @@ Each of the folders represents one scenario that can be deployed. Files in each 
 All of the files are optional and the author of the unit can decide which files to use. The names of the files are mandatory though.
 Each button representing a unit takes its name from the unit folder. A search box is located above the button list to filter the units based on their name. At the bottom of the unit area is a refresh button to load the list of units again, in case unit folders were modified after the launch of the script.
 
+>**Note** The provided unit folders with the scripts are examples of what you can do. For usage in class it is recommended to create your own folders with the scripts you need. Maybe you even want to share them with the other MCTs out there and it can become a repository of scripts to use in Azure classes.
+
 ### Script area
 
 The main component of the script area are the tabs showing the content of the script files, which are loaded upon selection of one of the unit buttons. Each file is optional and all files are in the responsibility of the author of the unit files. Each file has a defined purpose.
@@ -166,9 +170,7 @@ There is no need to install the Linux subsystem to run the shell scripts to depl
 
 If the Azure CLI is not already installed on your system you download and install it from here: [https://docs.microsoft.com/cli/azure/install-azure-cli](https://docs.microsoft.com/cli/azure/install-azure-cli).
 
-The script will identify the installed software and show a yellow bulb on the Azure CLI tab in the script section. If the Azure CLI is not installed the bulb will be red.
-
-Select the yellow bulb on the Azure CLI tab to open the Azure CLI login page.
+The script will identify the installed software and show a yellow bulb on the Azure CLI tab in the script section. If the Azure CLI is not installed the bulb will be red. Select the yellow bulb on the Azure CLI tab to open the Azure CLI login page.
 
 ![Image of Azure CLI login window](/media/docu_CLILogin.png)
 

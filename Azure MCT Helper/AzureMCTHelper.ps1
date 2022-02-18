@@ -1487,7 +1487,7 @@ function GenerateForm {
                         Clear-Host
                         $script:CliLogin = $false
                         $logstring = $Error[0].Exception.Message
-                        $logstring += "Login with credentials NOT successfull"
+                        $logstring += "Login with credentials NOT successful"
                         Add-LogEntry -LogEntry $logstring -Severity Warning
                         $imgAzCLIBulb.Source = "$Script:ScriptFolder\Resources\bulbyellow.png"
                         $imgAzCLIBulbCR.Source = "$Script:ScriptFolder\Resources\bulbyellow.png"
@@ -1500,7 +1500,7 @@ function GenerateForm {
                 if (($error.Count -eq 0) -and ($AzCliLogin))
                 {
                     $script:CliLogin = $true
-                    Add-LogEntry -LogEntry "Azure Cli login with credentials successfull" -Severity Info
+                    Add-LogEntry -LogEntry "Azure Cli login with credentials successful" -Severity Info
                     $imgAzCLIBulb.Source = "$Script:ScriptFolder\Resources\bulbgreen.png"
                     $imgAzCLIBulbCR.Source = "$Script:ScriptFolder\Resources\bulbgreen.png"
                 }
@@ -1517,7 +1517,7 @@ function GenerateForm {
                     {
                         $script:CliLogin = $false
                         $logstring = $Error[0].Exception.Message
-                        $logstring += "Login with service principal NOT successfull"
+                        $logstring += "Login with service principal NOT successful"
                         Add-LogEntry -LogEntry $logstring -Severity Warning
                         $imgAzCLIBulb.Source = "$Script:ScriptFolder\Resources\bulbyellow.png"
                         $imgAzCLIBulbSP.Source = "$Script:ScriptFolder\Resources\bulbyellow.png"
@@ -1525,14 +1525,14 @@ function GenerateForm {
                     catch
                     {
                         $script:CliLogin = $false
-                        Add-LogEntry -LogEntry "Azure Cli login with service principal NOT successfull" -Severity Warning
+                        Add-LogEntry -LogEntry "Azure Cli login with service principal NOT successful" -Severity Warning
                         $imgAzCLIBulb.Source = "$Script:ScriptFolder\Resources\bulbyellow.png"
                     }
                 }
                 if (($error.Count -eq 0) -and ($AzCliLogin))
                 {
                     $script:CliLogin = $true
-                    Add-LogEntry -LogEntry "Azure Cli login with service principal successfull" -Severity Info
+                    Add-LogEntry -LogEntry "Azure Cli login with service principal successful" -Severity Info
                     $imgAzCLIBulb.Source = "$Script:ScriptFolder\Resources\bulbgreen.png"
                     $imgAzCLIBulbSP.Source = "$Script:ScriptFolder\Resources\bulbgreen.png"
                 }
@@ -1563,7 +1563,7 @@ function GenerateForm {
                             Clear-Host
                             $script:CliLogin = $false
                             $logstring = $Error[0].Exception.Message
-                            $logstring += "Login with managed identity NOT successfull"
+                            $logstring += "Login with managed identity NOT successful"
                             Add-LogEntry -LogEntry $logstring -Severity Warning
                             $imgAzCLIBulb.Source = "$Script:ScriptFolder\Resources\bulbyellow.png"
                             $imgAzCLIBulbMI.Source = "$Script:ScriptFolder\Resources\bulbyellow.png"
@@ -1582,7 +1582,7 @@ function GenerateForm {
                 if (($error.Count -eq 0) -and ($AzCliLogin))
                 {
                     $script:CliLogin = $true
-                    Add-LogEntry -LogEntry "Azure Cli login with managed identity successfull" -Severity Info
+                    Add-LogEntry -LogEntry "Azure Cli login with managed identity successful" -Severity Info
                     $imgAzCLIBulb.Source = "$Script:ScriptFolder\Resources\bulbgreen.png"
                     $imgAzCLIBulbMI.Source = "$Script:ScriptFolder\Resources\bulbgreen.png"
                 }
