@@ -11,13 +11,13 @@ The script is provided as is and no support or warranties are given.
 
 ## What is the purpose of the tool?
 
-As a trainer, did you ever struggle to get the sample code written while you are teaching? Or did you ever have the feeling, that you are wasting your students time while they are watching you typing code? That is exactly what this tool is trying to help you with. Deployment at your fingertips no matter if it is a azuredeploy.json, a powershell or a bash script. All in one place without learning Azure DevOps and pipelines or other sophisticated deployment methods. Snippets of code ready for showing stuff during training.
+As a trainer, did you ever struggle to get the sample code written while you are teaching? Or did you ever have the feeling, that you are wasting your students time while they are watching you typing code? That is exactly what this tool is trying to help you with. Deployment at your fingertips no matter if it is a azuredeploy.json, a PowerShell or a bash script. All in one place without learning Azure DevOps and pipelines or other sophisticated deployment methods. Snippets of code ready for showing stuff during training.
 
 ## Installation of the Azure MCT Helper
 
 Place the script and its subfolders in any folder on your system. Make sure that the execution of PowerShell scripts is allowed for the account you are using. There are no administrative rights needed to run the script, although the installation of the Azure Az PowerShell module is required. The script will not work as intended without it. Optionally the installation of the Azure CLI module is required in case the unit contains shell files. Installation instructions for the Azure CLI can be found at the end of this document.
 
-To install the Azure Az PowerShell module follow the instructions provided by Microsoft here: [https://docs.microsoft.com/powershell/azure/install-az-ps?view=azps-7.2.0](https://docs.microsoft.com/powershell/azure/install-az-ps?view=azps-7.2.0)
+To install the Azure Az PowerShell module follow the instructions provided by Microsoft here: [https://learn.microsoft.com/en-us/powershell/azure/install-azure-powershell?view=azps-11.2.0]( https://learn.microsoft.com/en-us/powershell/azure/install-azure-powershell?view=azps-11.2.0)
 
 If your PowerShell or Bash scripts require additional modules they need to installed and loaded before using them in the tool.
 
@@ -38,7 +38,7 @@ The settings.json file has four sections as well as the version section.
 {
     "version": "1",
     "defaults": {
-        "formCaption": "Azure MCT Helper v1.0",
+        "formCaption": "Azure MCT Helper v1.1",
         "workdir": "Units",
         "SkipAzModuleStatus": false,
         "DefaultTenant": "Contoso Training",
@@ -77,7 +77,7 @@ In the defaults section, you can pre-configure values to become values of variab
 These are the variables you need to replace with your own values:
 
 ```powershell
-        $script:formCaption = 'Azure MCT Helper v1.0'
+        $script:formCaption = 'Azure MCT Helper v1.1'
         $script:workdir = "Units"
         $script:SkipAzModuleStatus = $false
         $script:DefaultTenant = ""
@@ -148,7 +148,7 @@ As within Azure itself `azuredeploy.json` files can be used as templates to depl
 Together with the above mentioned file `azuredeploy.json` the resources get the parameter values passed on to customize the deployment to your needs. Together the two files are used by `New-AzResourceGroupDeployment` to create the resources in Azure.
 
 ***azuredeploy.json.github.txt***
-If the unit, that should be deployed, already exists on GitHub, the azuredeploy.json.github.txt file provides a way to just point to the URL of the file. So a unit leveraging the Azure storage account quickstart template on GitHub would contain a file in its unit folder named `azuredeploy.json.github.txt` with just one line of text in it pointing to this link: [https://github.com/Azure/azure-quickstart-templates/blob/master/quickstarts/microsoft.storage/storage-account-create/azuredeploy.json](https://github.com/Azure/azure-quickstart-templates/blob/master/quickstarts/microsoft.storage/storage-account-create/azuredeploy.json).
+If the unit, that should be deployed, already exists on GitHub, the azuredeploy.json.github.txt file provides a way to just point to the URL of the file. So a unit leveraging the Azure storage account QuickStart template on GitHub would contain a file in its unit folder named `azuredeploy.json.github.txt` with just one line of text in it pointing to this link: [https://github.com/Azure/azure-quickstart-templates/blob/master/quickstarts/microsoft.storage/storage-account-create/azuredeploy.json](https://github.com/Azure/azure-quickstart-templates/blob/master/quickstarts/microsoft.storage/storage-account-create/azuredeploy.json).
 
 ***azuredeploy.parameters.json.github.txt***
 Following the same principle the file `azuredeploy.parameters.json.github.txt` can be placed into the unit folder and only contain one line of text representing the URL to the parameters file of the same GitHub example. In the above mentioned case this would be: [https://github.com/Azure/azure-quickstart-templates/blob/master/quickstarts/microsoft.storage/storage-account-create/azuredeploy.parameters.json](https://github.com/Azure/azure-quickstart-templates/blob/master/quickstarts/microsoft.storage/storage-account-create/azuredeploy.parameters.json).
@@ -168,7 +168,7 @@ There is no need to install the Linux subsystem to run the shell scripts to depl
 
 #### Azure CLI Installation and login
 
-If the Azure CLI is not already installed on your system you download and install it from here: [https://docs.microsoft.com/cli/azure/install-azure-cli](https://docs.microsoft.com/cli/azure/install-azure-cli).
+If the Azure CLI is not already installed on your system you download and install it from here: [https://learn.microsoft.com/en-us/cli/azure/install-azure-cli]( https://learn.microsoft.com/en-us/cli/azure/install-azure-cli).
 
 The script will identify the installed software and show a yellow bulb on the Azure CLI tab in the script section. If the Azure CLI is not installed the bulb will be red. Select the yellow bulb on the Azure CLI tab to open the Azure CLI login page.
 
@@ -177,3 +177,5 @@ The script will identify the installed software and show a yellow bulb on the Az
 There are three options to login with Azure CLI. User account & password, service principal, and managed instance. Provide the needed login information to login with the expanded login type. A successful login will be indicated by a green bulb beside the login type and on the main Azure CLI tab.
 
 To log out of Azure CLI select the green bulb.
+
+
