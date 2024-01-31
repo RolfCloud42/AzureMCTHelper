@@ -1,7 +1,7 @@
 {
     "version": "1",
     "defaults": {
-        "formCaption": "Azure MCT Helper v1.0",
+        "formCaption": "Azure MCT Helper v1.1",
         "workdir": "Units",
         "SkipAzModuleStatus": false,
         "DefaultTenant": "Contoso Training",

@@ -1,4 +1,23 @@
-﻿Clear-Host
+﻿<#
+.Synopsis
+    PowerShell script with WPF GUI for easy usage of Azure tasks during training.
+    Author   Rolf McLaughlin
+    Company  TheCloud42 (https://TheCloud42.com)
+    Source   https://github.com/RolfCloud42/AzureMCTHelper/
+.Description
+    Deployment at your fingertips no matter if it is a azuredeploy.json, a powershell or a bash script. 
+    All in one place without learning Azure DevOps and pipelines or other sophisticated deployment methods. 
+    Snippets of code ready for showing stuff during training.
+.EXAMPLE
+    Download all files from the above mentioned Github repository.
+    Place the script and its subfolders in any folder on your system. Make sure that the execution 
+    of PowerShell scripts is allowed for the account you are using. There are no administrative rights 
+    needed to run the script, although the installation of the PowerShell module Az is required. 
+    The script will not work as intended without it. Optionally the installation of the Azure CLI module 
+    is required in case the unit contains shell files.
+#>
+
+Clear-Host
 Add-Type -AssemblyName PresentationFramework # needed when starting the script from the command line and not from the ISE
 #Requires -Version 5
 
@@ -61,7 +80,7 @@ Add-Type -AssemblyName PresentationFramework # needed when starting the script f
         $script:DefaultAccount = ""
         $script:DefaultEditor = "code"
 
-        Write-Host "Settings loaded from script and tenants.csv..."
+        Write-Output "Settings loaded from script and tenants.csv..."
         $script:PreGUIMessages += "Settings loaded from script and tenants.csv..."
     }
 #endregion Settings
@@ -206,18 +225,18 @@ function GetAMHSettings {
         {
             if (Test-Path -Path "$Script:ScriptFolder\Resources\settings.json") {
                 $script:settings = Get-Content -Path $Script:ScriptFolder\Resources\settings.json | ConvertFrom-Json
-                Write-Host "Settings loaded from JSON..."
+                Write-Output "Settings loaded from JSON..."
                 $script:PreGUIMessages += "Settings loaded from JSON..."
             }
             else {
-                Write-Host "The settings file cannot be found. Reverting back to tenants.csv... " -BackgroundColor Red -ForegroundColor White
+                Write-Output "The settings file cannot be found. Reverting back to tenants.csv... " -BackgroundColor Red -ForegroundColor White
                 $script:UseSettingsJSON = $false
                 GetAMHSettings
             } 
         }
         catch
         {
-            Write-Host " Error locating and loading the settings. Closing... " -BackgroundColor Red -ForegroundColor White
+            Write-Output " Error locating and loading the settings. Closing... " -BackgroundColor Red -ForegroundColor White
             Exit 1
         }
 
@@ -862,13 +881,13 @@ function InitializeAzCliForm {
         }
         else
         {
-            Write-Host " The form cannot be found. Closing... " -BackgroundColor Red -ForegroundColor White
+            Write-Output " The form cannot be found. Closing... " -BackgroundColor Red -ForegroundColor White
             Exit 1
         } 
     }
     catch
     {
-        Write-Host " Error locating and loading the form. Closing... " -BackgroundColor Red -ForegroundColor White
+        Write-Output " Error locating and loading the form. Closing... " -BackgroundColor Red -ForegroundColor White
         Exit 1
     }
 
@@ -937,13 +956,13 @@ function InitializeForm {
         }
         else
         {
-            Write-Host " The form cannot be found. Closing... " -BackgroundColor Red -ForegroundColor White
+            Write-Output " The form cannot be found. Closing... " -BackgroundColor Red -ForegroundColor White
             Exit 1
         } 
     }
     catch
     {
-        Write-Host " Error locating and loading the form. Closing... " -BackgroundColor Red -ForegroundColor White
+        Write-Output " Error locating and loading the form. Closing... " -BackgroundColor Red -ForegroundColor White
         Exit 1
     }
 
