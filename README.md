@@ -174,7 +174,7 @@ The script will identify the installed software and show a yellow bulb on the Az
 
 ![Image of Azure CLI login window](/media/docu_CLILogin.png)
 
-There are three options to login with Azure CLI. User account & password, service principal, and managed instance. Provide the needed login information to login with the expanded login type. A successful login will be indicated by a green bulb beside the login type and on the main Azure CLI tab.
+There are five options to login with Azure CLI. Only signing in interactively, with a service principal or a managed identity are supporteds by this tool. Learn about the Azure CLI login options here: [https://learn.microsoft.com/en-us/cli/azure/authenticate-azure-cli](https://learn.microsoft.com/en-us/cli/azure/authenticate-azure-cli). Provide the needed login information to login with the selected login type. A successful login will be indicated by a green bulb beside the login type and on the main Azure CLI tab.
 
 To log out of Azure CLI select the green bulb.
 
