@@ -17,7 +17,7 @@ As a trainer, did you ever struggle to get the sample code written while you are
 
 Place the script and its subfolders in any folder on your system. Make sure that the execution of PowerShell scripts is allowed for the account you are using. There are no administrative rights needed to run the script, although the installation of the Azure Az PowerShell module is required. The script will not work as intended without it. Optionally the installation of the Azure CLI module is required in case the unit contains shell files. Installation instructions for the Azure CLI can be found at the end of this document.
 
-To install the Azure Az PowerShell module follow the instructions provided by Microsoft here: [https://learn.microsoft.com/en-us/powershell/azure/install-azure-powershell?view=azps-11.2.0]( https://learn.microsoft.com/en-us/powershell/azure/install-azure-powershell?view=azps-11.2.0)
+To install the Azure Az PowerShell module follow the instructions provided by Microsoft here: [https://learn.microsoft.com/powershell/azure/install-azure-powershell?view=azps-11.2.0]( https://learn.microsoft.com/powershell/azure/install-azure-powershell?view=azps-11.2.0)
 
 If your PowerShell or Bash scripts require additional modules they need to installed and loaded before using them in the tool.
 
@@ -168,14 +168,12 @@ There is no need to install the Linux subsystem to run the shell scripts to depl
 
 #### Azure CLI Installation and login
 
-If the Azure CLI is not already installed on your system you download and install it from here: [https://learn.microsoft.com/en-us/cli/azure/install-azure-cli]( https://learn.microsoft.com/en-us/cli/azure/install-azure-cli).
+If the Azure CLI is not already installed on your system you download and install it from here: [https://learn.microsoft.com/cli/azure/install-azure-cli]( https://learn.microsoft.com/cli/azure/install-azure-cli).
 
 The script will identify the installed software and show a yellow bulb on the Azure CLI tab in the script section. If the Azure CLI is not installed the bulb will be red. Select the yellow bulb on the Azure CLI tab to open the Azure CLI login page.
 
 ![Image of Azure CLI login window](/media/docu_CLILogin.png)
 
-There are five options to login with Azure CLI. Only signing in interactively, with a service principal or a managed identity are supporteds by this tool. Learn about the Azure CLI login options here: [https://learn.microsoft.com/en-us/cli/azure/authenticate-azure-cli](https://learn.microsoft.com/en-us/cli/azure/authenticate-azure-cli). Provide the needed login information to login with the selected login type. A successful login will be indicated by a green bulb beside the login type and on the main Azure CLI tab.
+There are five options to login with Azure CLI. Only signing in interactively, with a service principal or a managed identity are supported by this tool. Learn about the Azure CLI login options here: [https://learn.microsoft.com/cli/azure/authenticate-azure-cli](https://learn.microsoft.com/cli/azure/authenticate-azure-cli). Provide the needed login information to login with the selected login type. A successful login will be indicated by a green bulb beside the login type and on the main Azure CLI tab.
 
 To log out of Azure CLI select the green bulb.
-
-
