@@ -812,7 +812,7 @@ function FormResize ($SelectedSize) {
     Foreach ($control in $script:AllControls)
     {
         if ($control.FontSize) {
-            $control.FontSize = $script:StartupFontSize * $script:multiplier
+            if ($control.Name -ne "lblFilterUnitsClear") {$control.FontSize = $script:StartupFontSize * $script:multiplier}
         }
     }
     $script:sliderValueBefore = $sliderSize.Value
