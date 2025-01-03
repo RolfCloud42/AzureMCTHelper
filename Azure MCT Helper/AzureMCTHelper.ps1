@@ -55,7 +55,7 @@ Add-Type -AssemblyName PresentationFramework # needed when starting the script f
     [bool]$script:GitHubDeploymentJson = $false
     [bool]$script:GitHubDeploymentParameter = $false
 
-    [bool]$script:AzModuleInstalled = $true
+    [bool]$script:AzModuleInstalled = $false
     [bool]$script:logedin = $false
     [bool]$script:CliLogin = $false
     $script:CliLoginType = "CR"
@@ -71,7 +71,7 @@ Add-Type -AssemblyName PresentationFramework # needed when starting the script f
     {
         $script:formCaption = 'Azure MCT Helper v1.1'
         $script:workdir = "$Script:ScriptFolder\Units"
-        $script:SkipAzModuleStatus = $true
+        $script:SkipAzModuleStatus = $false
         $script:DefaultTenant = ""
         $script:DefaultSubscription = ""
         $script:DefaultRegion = "northeurope"
@@ -157,18 +157,22 @@ function RefreshUI {
 } # end function RefreshUI
 
 function Add-Module ($module) {
-    if ($script:AzModuleInstalled -eq $false)
+    if (($script:AzModuleStatus -eq "not verified") -or ($btnAzureModule.Content -eq "verifying..."))
     {
-        $Modulstate = $false
+        $Modulestate = $false
         if (Get-Module -Name $module) { # If module is imported do nothing
-            $Modulstate = $true 
+            $Modulestate = $true 
             $logstring = "Module $module loaded"
             Add-LogEntry -LogEntry $logstring -Severity Info
         }
         else {
+            $btnAzureModule.IsEnabled = $false
+            RefreshUI
             if ((Get-Module -ListAvailable).Name -eq $module) { # If module is not imported, but available on disk then import
+                $lblAzureModuleStatus.Content = "importing module..."
+                RefreshUI
                 Import-Module -Name $module
-                $Modulstate = $true
+                $Modulestate = $true
                 $logstring = "Module $module imported"
                 Add-LogEntry -LogEntry $logstring -Severity Info
             }
@@ -177,9 +181,13 @@ function Add-Module ($module) {
                     $logstring = "Module $module is not imported, not available on disk, but is in the online gallery. Installation and import will take a while"
                     Add-LogEntry -LogEntry $logstring -Severity Warning
 
+                    $lblAzureModuleStatus.Content = "installing module..."
+                    RefreshUI
                     Install-Module -Name $module -Force -Scope CurrentUser -AllowClobber -Confirm:$False
-                    Import-Module $module
-                    $Modulstate = $true
+                    $lblAzureModuleStatus.Content = "importing module..."
+                    RefreshUI
+                    Import-Module -name $module
+                    $Modulestate = $true
                     $logstring = "Module $module installed and imported"
                     Add-LogEntry -LogEntry $logstring -Severity Info
                     
@@ -190,8 +198,10 @@ function Add-Module ($module) {
                 }
             }
         }
+        $btnAzureModule.IsEnabled = $true
+        RefreshUI
     }
-    If ($Modulstate -eq $true)
+    If ($true -eq $Modulestate)
     {
         $script:AzModuleInstalled = $true
     }
@@ -1057,10 +1067,10 @@ function GenerateForm {
   
     Add-LogEntry -LogEntry "Azure MCT Helper tool started: $(Get-Date)" -Severity Info
     
-    if ($script:SkipAzModuleStatus -eq $false) {
+    if ($false -eq $script:SkipAzModuleStatus) {
         $lblAzureModuleStatus.Content = $script:AzModuleStatus
     }
-    elseif ($script:SkipAzModuleStatus -eq $true) {
+    elseif ($true -eq $script:SkipAzModuleStatus) {
         $lblAzureModuleStatus.Content = "skipped"
         $script:AzModuleInstalled = $true
         Add-Module -module Az
