@@ -24,16 +24,16 @@
                 <Label Name="lblAzureModuleStatus" Content="" HorizontalAlignment="Stretch" VerticalAlignment="Top" VerticalContentAlignment="Top" MinHeight="30" FontSize="11" Margin="0,0,0,5"/>
                 <Button Name="btnAzureModule" Content="verify" HorizontalAlignment="Stretch" VerticalAlignment="Top" MinHeight="30" FontSize="11"/>
                 <Label Name="lblTenant" Content="Tenant selection:" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" MinHeight="30" Margin="0,5,0,0" VerticalContentAlignment="Bottom" FontSize="11"/>
-                <ComboBox Name="cbTenant" HorizontalAlignment="Stretch" VerticalAlignment="Top" MinHeight="30" SelectedIndex="0" IsEnabled="False" FontSize="11"/>
+                <ComboBox Name="cbTenant" HorizontalAlignment="Stretch" VerticalAlignment="Top" MinHeight="30" SelectedIndex="0" IsEnabled="False" FontSize="11" VerticalContentAlignment="Center"/>
                 <Label Name="lblLoginUser" Content="Login user:" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" MinHeight="30" Margin="0,5,0,0" VerticalContentAlignment="Bottom" FontSize="11"/>
                 <TextBox Name="tbLoginUser" Text="" HorizontalAlignment="Stretch" VerticalAlignment="Top" MinHeight="30" VerticalContentAlignment="Center" FontSize="11"/>
                 <Button Name="btnLogin" Content="login" HorizontalAlignment="Stretch" VerticalAlignment="Top" MinHeight="30" IsEnabled="False" FontSize="11" Margin="0,5,0,0"/>
                 <Label Name="lblSubscription" Content="Subscription selection:" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" MinHeight="30" Margin="0,5,0,0" VerticalContentAlignment="Bottom" FontSize="11"/>
-                <ComboBox Name="cbSubscription" HorizontalAlignment="Stretch" VerticalAlignment="Top" MinHeight="30" SelectedIndex="0" IsEnabled="False" FontSize="11" Text="No subscriptions found in selected tenant."/>
+                <ComboBox Name="cbSubscription" HorizontalAlignment="Stretch" VerticalAlignment="Top" MinHeight="30" SelectedIndex="0" IsEnabled="False" FontSize="11" Text="No subscriptions found in selected tenant." VerticalContentAlignment="Center"/>
                 <Label Name="lblRegion" Content="Region selection:" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" MinHeight="30" Margin="0,5,0,0" VerticalContentAlignment="Bottom" FontSize="11"/>
-                <ComboBox Name="cbRegion" HorizontalAlignment="Stretch" VerticalAlignment="Top" MinHeight="30" IsEnabled="False" FontSize="11"/>
+                <ComboBox Name="cbRegion" HorizontalAlignment="Stretch" VerticalAlignment="Top" MinHeight="30" IsEnabled="False" FontSize="11" VerticalContentAlignment="Center"/>
                 <Label Name="lblResourceGroup" Content="Resource group(s):" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" MinHeight="30" Margin="0,5,0,0" VerticalContentAlignment="Bottom" FontSize="11"/>
-                <ComboBox Name="cbResourceGroup" IsEditable="True" Text="(New) Resource group" HorizontalAlignment="Stretch" VerticalAlignment="Top" MinHeight="30" IsEnabled="False" FontSize="11"/>
+                <ComboBox Name="cbResourceGroup" IsEditable="True" Text="(New) Resource group" HorizontalAlignment="Stretch" VerticalAlignment="Top" MinHeight="30" IsEnabled="False" FontSize="11" VerticalContentAlignment="Center"/>
                 <Button Name="btnRGCreate" Content="Create RG" HorizontalAlignment="Stretch" VerticalAlignment="Top" MinHeight="30" IsEnabled="False" FontSize="11" Margin="0,5,0,0"/>
             </StackPanel>
         </Expander>

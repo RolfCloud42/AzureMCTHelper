@@ -190,7 +190,6 @@ function Add-Module ($module) {
                     $Modulestate = $true
                     $logstring = "Module $module installed and imported"
                     Add-LogEntry -LogEntry $logstring -Severity Info
-                    
                 }
                 else {# If module is not imported, not available and not in online gallery then abort
                     $logstring = "Module $module not imported, not available and not in online gallery, exiting advised."
