@@ -67,7 +67,7 @@ Add-Type -AssemblyName PresentationFramework # needed when starting the script f
 
 #region Settings
     # all of these values can be configured within $Script:ScriptFolder\Resources\settings.json
-    if ($script:UseSettingsJSON -eq $false)
+    if ($false -eq $script:UseSettingsJSON)
     {
         $script:formCaption = 'Azure MCT Helper v1.1'
         $script:workdir = "$Script:ScriptFolder\Units"
@@ -231,7 +231,7 @@ function Find-AzureCLI {
 } # end function Find-AzureCLI 
 
 function GetAMHSettings {
-    if ($script:UseSettingsJSON -eq $true)
+    if ($true -eq $script:UseSettingsJSON)
     {
         try
         {
@@ -282,7 +282,7 @@ function FillTenantCB {
     $script:tenants = $null
     $cbTenant.Items.Clear()
     
-    if ($script:UseSettingsJSON -eq $true)
+    if ($true -eq $script:UseSettingsJSON)
     {
         $script:tenants = $script:settings.tenants
     }
@@ -672,7 +672,7 @@ function DeployScript ($UnitScript) {
         Add-LogEntry -LogEntry $logstring -Severity Info
 
         $Script = Get-Content $UnitScript
-        if ($cbxVariableReplacement.IsChecked -eq $true)
+        if ($true -eq $cbxVariableReplacement.IsChecked)
         {
             $Script = ReplaceScriptVariables -line2replace $Script
         }
@@ -728,7 +728,7 @@ function ToggleDeployButtons ($Toggle) {
     {
         if (($null -ne $script:SelectedUnit) -and (Test-Path -Path $script:UnitFileDeploy))
         {
-            if ($script:logedin -eq $true)
+            if ($true -eq $script:logedin)
             {
                 $imgDeployActive.Visibility = "Visible"
                 $imgDeployInactive.Visibility = "Hidden"
@@ -750,7 +750,7 @@ function ToggleDeployButtons ($Toggle) {
     {
         if ($null -ne $script:SelectedUnit) 
         {
-            if ($script:logedin -eq $true)
+            if ($true -eq $script:logedin)
             {
                 $imgScriptActive.Visibility = "Visible"
                 $imgScriptInactive.Visibility = "Hidden"
@@ -833,7 +833,7 @@ function FormAzCliResize {
 } # end function FormResize
 
 function LogoutAzCli {
-    if ($script:CliLogin -eq $true) 
+    if ($true -eq $script:CliLogin) 
     {
         Az Logout
         $script:CliLogin = $false
@@ -872,7 +872,7 @@ function LogoutCleanup {
         $cbxVariableReplacement.IsEnabled = $false
         $cbxVariableReplacement.Visibility = "Hidden"
         $lblVariableReplacement.Visibility = "Hidden"
-        if ($script:CliLogin -eq $true) 
+        if ($true -eq $script:CliLogin) 
         {
             Az Logout
         }
@@ -939,7 +939,7 @@ function GenerateAzCliForm {
     $imgAzCLIBulbSP.Source = "$Script:ScriptFolder\Resources\bulbyellow.png"
     $imgAzCLIBulbMI.Source = "$Script:ScriptFolder\Resources\bulbyellow.png"
 
-    if ($script:CliLogin -eq $true)
+    if ($true -eq $script:CliLogin)
     {
         switch ($script:CliLoginType) {
         'CR' {$imgAzCLIBulbCR.Source = "$Script:ScriptFolder\Resources\bulbgreen.png"}
@@ -1094,21 +1094,21 @@ function GenerateForm {
 #region Eventhandling
 
     $exContextOpen_MouseEnter = {
-        If ($exContextOpen.IsExpanded -eq $false)
+        If ($false -eq $exContextOpen.IsExpanded)
         {
              $exContextOpen.IsExpanded = $true
         }
     }
 
     $exContextOpen_MouseLeave = {
-        If ($exContextOpen.IsExpanded -eq $true)
+        If ($true -eq $exContextOpen.IsExpanded)
         {
              $exContextOpen.IsExpanded = $false
         }
     }
 
     $btnAzureModule_Click = {
-        If ($script:SkipAzModuleStatus -eq $false)
+        If ($false -eq $script:SkipAzModuleStatus)
         {
             $logstring = "verifying Azure module installation status"
             Add-LogEntry -LogEntry $logstring -Severity Info
@@ -1117,7 +1117,7 @@ function GenerateForm {
             $logstring = "Installing Azure module"
             Add-LogEntry -LogEntry $logstring -Severity Info
             Add-Module -module Az
-            if ($script:AzModuleInstalled -eq $true)
+            if ($true -eq $script:AzModuleInstalled)
             {
                 $lblAzureModuleStatus.Content = "installed"
                 $btnAzureModule.Content = "Verify"
@@ -1132,7 +1132,7 @@ function GenerateForm {
                 Add-LogEntry -LogEntry $logstring -Severity Warning
                 $lblAzureModuleStatus.Content = "not installed"}
             }
-        elseif ($script:SkipAzModuleStatus -eq $true)
+        elseif ($true -eq $script:SkipAzModuleStatus)
         {
             $logstring = "Azure module installation status skipped"
             Add-LogEntry -LogEntry $logstring -Severity Info
@@ -1227,7 +1227,7 @@ function GenerateForm {
     $cbTenant_DropDownClosed = {
         $script:SelectedTenantName = $cbTenant.SelectedItem.Content
         $script:SelectedTenantID = $cbTenant.SelectedItem.Tag
-        If ($script:logedin -eq $true)
+        If ($true -eq $script:logedin)
         {
             $cbSubscription.IsEnabled = $false
             FillSubscriptionCB
@@ -1236,7 +1236,7 @@ function GenerateForm {
     }
 
     $cbSubscription_DropDownClosed = {
-        If ($script:logedin -eq $true)
+        If ($true -eq $script:logedin)
         {
             $script:SelectedSubscriptionName = $cbSubscription.SelectedItem.Content
             $script:SelectedSubscriptionID = $cbSubscription.SelectedItem.Tag
@@ -1257,7 +1257,7 @@ function GenerateForm {
     }
 
     $cbRegion_DropDownClosed = {
-        if ($script:logedin -eq $true)
+        if ($true -eq $script:logedin)
         { 
             $script:SelectedRegionName = $cbRegion.SelectedItem.Name
             $script:SelectedRegionDisplayName = $cbRegion.SelectedItem.Content
@@ -1430,7 +1430,7 @@ function GenerateForm {
         
         if ($psversiontable.psversion.major -eq 5) # because ConvertFrom-Json added the parameter -AsHashtable later only local files will be used
         { # -TemplateFile & -TemplateParameterFile
-            if ($script:GitHubDeploymentJson -eq $false)
+            if ($false -eq $script:GitHubDeploymentJson)
             {
                 $script:AzureOutput = New-AzResourceGroupDeployment -ResourceGroupName $script:SelectedRecourcegroupName -TemplateFile $script:UnitFileDeploy -TemplateParameterFile $script:UnitFileParameter -Tag $script:AzResourceTag -WarningAction SilentlyContinue -ErrorAction SilentlyContinue
             }
@@ -1442,18 +1442,18 @@ function GenerateForm {
         }
         elseif ($psversiontable.psversion.major -gt 5)
         { # -TemplateObject & -TemplateParameterObject
-            if (($script:GitHubDeploymentJson -eq $true) -and ($script:GitHubDeploymentParameter -eq $true))
+            if (($true -eq $script:GitHubDeploymentJson) -and ($true -eq $script:GitHubDeploymentParameter))
             {
                 $script:azuredeployjson = $script:azuredeployjson | ConvertFrom-Json -AsHashtable
                 $script:azuredeployparameter = $script:azuredeployparameter | ConvertFrom-Json -AsHashtable
                 $script:AzureOutput = New-AzResourceGroupDeployment -ResourceGroupName $script:SelectedRecourcegroupName -TemplateObject $script:azuredeployjson -TemplateParameterObject $script:azuredeployparameter -Tag $script:AzResourceTag -WarningAction SilentlyContinue -ErrorAction SilentlyContinue
             }
-            elseif (($script:GitHubDeploymentJson -eq $true) -and ($script:GitHubDeploymentParameter -eq $false))
+            elseif (($true -eq $script:GitHubDeploymentJson) -and ($false -eq $script:GitHubDeploymentParameter))
             {
                 $script:azuredeployjson = $script:azuredeployjson | ConvertFrom-Json -AsHashtable
                 $script:AzureOutput = New-AzResourceGroupDeployment -ResourceGroupName $script:SelectedRecourcegroupName -TemplateObject $script:azuredeployjson -TemplateParameterFile $script:UnitFileParameter -Tag $script:AzResourceTag -WarningAction SilentlyContinue -ErrorAction SilentlyContinue
             }
-            elseif (($script:GitHubDeploymentJson -eq $false) -and ($script:GitHubDeploymentParameter -eq $true))
+            elseif (($false -eq $script:GitHubDeploymentJson) -and ($true -eq $script:GitHubDeploymentParameter))
             {
                 $script:azuredeployparameter = $script:azuredeployparameter | ConvertFrom-Json -AsHashtable
                 $script:AzureOutput = New-AzResourceGroupDeployment -ResourceGroupName $script:SelectedRecourcegroupName -TemplateFile $script:UnitFileDeploy -TemplateParameterObject $script:azuredeployparameter -Tag $script:AzResourceTag -WarningAction SilentlyContinue -ErrorAction SilentlyContinue            
@@ -1467,11 +1467,11 @@ function GenerateForm {
     }
 
     $DeployUnitScript = {
-        If ($tabPowerShell.IsSelected -eq $true)
+        If ($true -eq $tabPowerShell.IsSelected)
         {
             DeployScript -UnitScript $script:UnitFilePSScript
         }
-        If ($tabAzureCLI.IsSelected -eq $true)
+        If ($true -eq $tabAzureCLI.IsSelected)
         {
             DeployScript -UnitScript $script:UnitFileAZScript
         }
