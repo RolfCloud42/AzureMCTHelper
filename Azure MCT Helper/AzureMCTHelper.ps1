@@ -55,7 +55,7 @@ Add-Type -AssemblyName PresentationFramework # needed when starting the script f
     [bool]$script:GitHubDeploymentJson = $false
     [bool]$script:GitHubDeploymentParameter = $false
 
-    [bool]$script:AzModuleInstalled = $false
+    [bool]$script:AzModuleInstalled = $true
     [bool]$script:logedin = $false
     [bool]$script:CliLogin = $false
     $script:CliLoginType = "CR"
@@ -69,7 +69,7 @@ Add-Type -AssemblyName PresentationFramework # needed when starting the script f
     # all of these values can be configured within $Script:ScriptFolder\Resources\settings.json
     if ($script:UseSettingsJSON -eq $false)
     {
-        $script:formCaption = 'Azure MCT Helper v0.9'
+        $script:formCaption = 'Azure MCT Helper v1.1'
         $script:workdir = "$Script:ScriptFolder\Units"
         $script:SkipAzModuleStatus = $true
         $script:DefaultTenant = ""
@@ -202,8 +202,10 @@ function Add-Module ($module) {
 } # end function Add-Module
 
 function Find-AzureCLI {
+    New-PSDrive -PSProvider registry -Root HKEY_CLASSES_ROOT -Name HKCR
     $script:AzCliIsInstalled = $null
-    $script:AzCliIsInstalled = Get-ItemProperty HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\* | Where-Object {$_.DisplayName -Match "Microsoft Azure CLI"}
+    #$script:AzCliIsInstalled = Get-ItemProperty HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\* | Where-Object {$_.DisplayName -Match "Microsoft Azure CLI"}
+    $script:AzCliIsInstalled = Get-ItemProperty HKCR:\Installer\Products\* | Where-Object {$_.ProductName -Match "Microsoft Azure CLI"}
 
     If ($script:AzCliIsInstalled) 
     {
@@ -216,6 +218,7 @@ function Find-AzureCLI {
         $imgAzCLIBulb.Tooltip = "Azure CLI not installed!"
 
     }
+    Remove-PSDrive -Name HKCR
 } # end function Find-AzureCLI 
 
 function GetAMHSettings {
