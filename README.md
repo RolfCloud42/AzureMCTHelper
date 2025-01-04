@@ -17,7 +17,10 @@ As a trainer, did you ever struggle to get the sample code written while you are
 
 Place the script and its subfolders in any folder on your system. Make sure that the execution of PowerShell scripts is allowed for the account you are using. There are no administrative rights needed to run the script, although the installation of the Azure Az PowerShell module is required. The script will not work as intended without it. Optionally the installation of the Azure CLI module is required in case the unit contains shell files. Installation instructions for the Azure CLI can be found at the end of this document.
 
-To install the Azure Az PowerShell module follow the instructions provided by Microsoft here: [https://learn.microsoft.com/en-us/powershell/azure/install-azure-powershell?view=azps-13.0.0]( https://learn.microsoft.com/en-us/powershell/azure/install-azure-powershell?view=azps-13.0.0)
+To install the Azure Az PowerShell module follow the instructions provided by Microsoft here: [https://learn.microsoft.com/en-us/powershell/azure/install-azure-powershell]( https://learn.microsoft.com/en-us/powershell/azure/install-azure-powershell)
+
+Once you have installed the Azure PowerShell module you can set the variable `$script:SkipAzModuleStatus` to `$false`. Make sure to always use the module version required for your scripts. The tool also offers to verify the installation of the Azure PowerShell module using the button "verify" in the context area.
+>**Note** Since the module is very large the verification and importing of it, depending on you system, can take a significant amount of time.
 
 If your PowerShell or Bash scripts require additional modules they need to installed and loaded before using them in the tool.
 
