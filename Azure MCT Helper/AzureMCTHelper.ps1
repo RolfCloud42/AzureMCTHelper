@@ -804,19 +804,38 @@ function ToggleAzCliExpander ($expander) {
 } # end function ToggleAzCliExpander 
 
 function FormResize ($SelectedSize) {
-    $script:multiplier = $SelectedSize/100
-    
-    $AMHWindow.Width = $script:StartupWidth * $script:multiplier
-    $AMHWindow.Height = $script:StartupHeight * $script:multiplier
-    
-    Foreach ($control in $script:AllControls)
-    {
-        if ($control.FontSize) {
-            if ($control.Name -ne "lblFilterUnitsClear") {$control.FontSize = $script:StartupFontSize * $script:multiplier}
+    If ($script:sliderValueBefore -lt $SelectedSize) {
+        for ($step = $script:sliderValueBefore + 1 ; $step -le $SelectedSize; $step++) {
+            $script:multiplier = $step/100
+       
+            $AMHWindow.Width = $script:StartupWidth * $script:multiplier
+            $AMHWindow.Height = $script:StartupHeight * $script:multiplier
+            
+            Foreach ($control in $script:AllControls)
+            {
+                if ($control.FontSize) {
+                    if ($control.Name -ne "lblFilterUnitsClear") {$control.FontSize = $script:StartupFontSize * $script:multiplier}
+                }
+            }
+        RefreshUI
+        }
+    } elseif ($script:sliderValueBefore -gt $SelectedSize) {
+        for ($step = $script:sliderValueBefore - 1 ; $step -ge $SelectedSize; $step--) {
+            $script:multiplier = $step/100
+        
+            $AMHWindow.Width = $script:StartupWidth * $script:multiplier
+            $AMHWindow.Height = $script:StartupHeight * $script:multiplier
+            
+            Foreach ($control in $script:AllControls)
+            {
+                if ($control.FontSize) {
+                    if ($control.Name -ne "lblFilterUnitsClear") {$control.FontSize = $script:StartupFontSize * $script:multiplier}
+                }
+            }
+        RefreshUI
         }
     }
     $script:sliderValueBefore = $sliderSize.Value
-    RefreshUI
 } # end function FormResize
 
 function FormAzCliResize {
@@ -1052,6 +1071,7 @@ function GenerateForm {
     $script:StartupHeight = $AMHWindow.Height
     $script:StartupFontSize = $AMHWindow.FontSize
     $script:multiplier = $sliderSize.Value/100
+    $script:sliderValueBefore = $sliderSize.Value
 
     $imgDeployActive.Source = "$Script:ScriptFolder\Resources\DeployActive.png"
     $imgDeployInactive.Source = "$Script:ScriptFolder\Resources\DeployInactive.png"
