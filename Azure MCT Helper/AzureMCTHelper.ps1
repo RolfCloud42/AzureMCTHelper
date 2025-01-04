@@ -211,7 +211,7 @@ function Add-Module ($module) {
 } # end function Add-Module
 
 function Find-AzureCLI {
-    New-PSDrive -PSProvider registry -Root HKEY_CLASSES_ROOT -Name HKCR
+    New-PSDrive -PSProvider registry -Root HKEY_CLASSES_ROOT -Name HKCR | Out-Null
     $script:AzCliIsInstalled = $null
     #$script:AzCliIsInstalled = Get-ItemProperty HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\* | Where-Object {$_.DisplayName -Match "Microsoft Azure CLI"}
     $script:AzCliIsInstalled = Get-ItemProperty HKCR:\Installer\Products\* | Where-Object {$_.ProductName -Match "Microsoft Azure CLI"}
@@ -227,7 +227,7 @@ function Find-AzureCLI {
         $imgAzCLIBulb.Tooltip = "Azure CLI not installed!"
 
     }
-    Remove-PSDrive -Name HKCR
+    Remove-PSDrive -Name HKCR | Out-Null
 } # end function Find-AzureCLI 
 
 function GetAMHSettings {

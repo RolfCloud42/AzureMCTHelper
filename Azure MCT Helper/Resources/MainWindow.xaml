@@ -138,7 +138,7 @@
                     </Grid>
                 </TabItem>
             </TabControl>
-            <StackPanel Name="spVariableReplacement" Orientation="Horizontal" Grid.Column="0" Grid.Row="3" HorizontalAlignment="Center"  VerticalAlignment="Center">
+            <StackPanel Name="spVariableReplacement" Orientation="Horizontal" Grid.Column="0" Grid.Row="3" HorizontalAlignment="Center" VerticalAlignment="Center">
                 <CheckBox Name="cbxVariableReplacement" IsEnabled="False" Visibility="Visible" VerticalContentAlignment="Center"/>
                 <Label Name="lblVariableReplacement" Content="Replace script variables" FontSize="11" Visibility="Visible"/>
             </StackPanel>
@@ -150,7 +150,9 @@
                 </Image>
                 <Label Name="lblRefreshScripts" Content="Refresh scripts" MinHeight="24" FontSize="11" VerticalContentAlignment="Center" Margin="5,0,0,0"/>
             </StackPanel>
-            <Slider Name="sliderSize" VerticalAlignment="Center" MinWidth="150" MinHeight="30" Minimum="100" Maximum="150" TickPlacement="BottomRight" TickFrequency="10" Value="100" FontSize="11" IsSnapToTickEnabled="True" SmallChange="1" LargeChange="10" Grid.Column="2" Grid.Row="3"/>
+            <StackPanel Name="spSlider" Orientation="Horizontal" Grid.Column="2" Grid.Row="3" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Slider Name="sliderSize" VerticalAlignment="Center" MinWidth="150" MinHeight="30" Minimum="100" Maximum="150" TickPlacement="BottomRight" TickFrequency="10" Value="100" FontSize="11" IsSnapToTickEnabled="True" SmallChange="1" LargeChange="10" Grid.Column="2" Grid.Row="3"/>
+            </StackPanel>
         </Grid>
     </Grid>
 </Window>
