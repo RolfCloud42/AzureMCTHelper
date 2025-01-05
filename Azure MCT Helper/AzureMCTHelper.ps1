@@ -18,7 +18,15 @@
 #>
 
 Clear-Host
-Add-Type -AssemblyName PresentationFramework # needed when starting the script from the command line and not from the ISE
+Add-Type -AssemblyName PresentationCore,PresentationFramework # needed when starting the script from the command line and not from the ISE
+Add-Type -AssemblyName System.Windows.Forms
+Add-Type -AssemblyName System.Drawing
+
+# Debugging: Print the coordinate values
+Write-Host "X: $($SliderPoint2Screen.X), Y: $($SliderPoint2Screen.Y)"
+
+# Set cursor position
+[System.Windows.Forms.Cursor]::Position = New-Object System.Drawing.Point($SliderPoint2Screen.X, $SliderPoint2Screen.Y)
 #Requires -Version 5
 
 #region Generic_values
@@ -804,6 +812,7 @@ function ToggleAzCliExpander ($expander) {
 } # end function ToggleAzCliExpander 
 
 function FormResize ($SelectedSize) {
+    $position = $sliderSize.TransformToAncestor($spSlider).Transform([System.Windows.Point]::new(0, 0))
     If ($script:sliderValueBefore -lt $SelectedSize) {
         for ($step = $script:sliderValueBefore + 1 ; $step -le $SelectedSize; $step++) {
             $script:multiplier = $step/100
@@ -818,7 +827,10 @@ function FormResize ($SelectedSize) {
                 }
             }
         RefreshUI
-        }
+        $SliderPoint2Screen = $sliderSize.PointToScreen($position)
+        $SliderPoint2Screen.x = $($SliderPoint2Screen.x + $sliderSize.ActualWidth - 10)
+        $SliderPoint2Screen.y = $SliderPoint2Screen.y + 12
+    }
     } elseif ($script:sliderValueBefore -gt $SelectedSize) {
         for ($step = $script:sliderValueBefore - 1 ; $step -ge $SelectedSize; $step--) {
             $script:multiplier = $step/100
@@ -833,8 +845,14 @@ function FormResize ($SelectedSize) {
                 }
             }
         RefreshUI
+        $SliderPoint2Screen = $sliderSize.PointToScreen($position)
+        $SliderPoint2Screen.x = $SliderPoint2Screen.x + 10
+        $SliderPoint2Screen.y = $SliderPoint2Screen.y + 12
         }
     }
+    # get the new position of the slider control
+    #position the cursor to the new point
+    [System.Windows.Forms.Cursor]::Position = New-Object System.Drawing.Point($SliderPoint2Screen.X, $SliderPoint2Screen.Y)
     $script:sliderValueBefore = $sliderSize.Value
 } # end function FormResize
 
