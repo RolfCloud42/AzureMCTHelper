@@ -807,28 +807,34 @@ function ToggleAzCliExpander ($expander) {
 
 function FormResize ($SelectedSize) {
     $position = $sliderSize.TransformToAncestor($spSlider).Transform([System.Windows.Point]::new(0, 0))
+    # Get the current screen based on the mouse position
+    $mousePosition = [System.Windows.Forms.Cursor]::Position
+    $currentScreen = [System.Windows.Forms.Screen]::FromPoint($mousePosition)
+    # Grab the resolution of the current screen to find the scaling bounds 
+    $screenWidth = $currentScreen.WorkingArea.Width
+    $screenHeight = $currentScreen.WorkingArea.Height
+
     If ($script:sliderValueBefore -lt $SelectedSize) {
-        #for ($step = $script:sliderValueBefore + 1 ; $step -le $SelectedSize; $step++) {
         for ($step = $script:sliderValueBefore + 1 ; $step -le $SelectedSize; $step = $step + 0.2) {
             $script:multiplier = $step/100
-       
-            $AMHWindow.Width = $script:StartupWidth * $script:multiplier
-            $AMHWindow.Height = $script:StartupHeight * $script:multiplier
-            
-            Foreach ($control in $script:AllControls)
-            {
-                if ($control.FontSize) {
-                    if ($control.Name -ne "lblFilterUnitsClear") {$control.FontSize = $script:StartupFontSize * $script:multiplier}
+            If ((($script:StartupWidth * $script:multiplier) -le $screenWidth) -and (($script:StartupHeight * $script:multiplier) -le $screenHeight)) {
+                $AMHWindow.Width = $script:StartupWidth * $script:multiplier
+                $AMHWindow.Height = $script:StartupHeight * $script:multiplier
+                
+                Foreach ($control in $script:AllControls)
+                {
+                    if ($control.FontSize) {
+                        if ($control.Name -ne "lblFilterUnitsClear") {$control.FontSize = $script:StartupFontSize * $script:multiplier}
+                    }
                 }
+            RefreshUI
+            $SliderPoint2Screen = $sliderSize.PointToScreen($position)
+            $SliderPoint2Screen.x = $($SliderPoint2Screen.x + $sliderSize.ActualWidth - 10)
+            $SliderPoint2Screen.y = $SliderPoint2Screen.y + 12
+            [System.Windows.Forms.Cursor]::Position = New-Object System.Drawing.Point($SliderPoint2Screen.X, $SliderPoint2Screen.Y)
             }
-        RefreshUI
-        $SliderPoint2Screen = $sliderSize.PointToScreen($position)
-        $SliderPoint2Screen.x = $($SliderPoint2Screen.x + $sliderSize.ActualWidth - 10)
-        $SliderPoint2Screen.y = $SliderPoint2Screen.y + 12
-        [System.Windows.Forms.Cursor]::Position = New-Object System.Drawing.Point($SliderPoint2Screen.X, $SliderPoint2Screen.Y)
-    }
+        }
     } elseif ($script:sliderValueBefore -gt $SelectedSize) {
-        #for ($step = $script:sliderValueBefore - 1 ; $step -ge $SelectedSize; $step--) {
         for ($step = $script:sliderValueBefore - 1 ; $step -ge $SelectedSize; $step = $step - 0.2) {
             $script:multiplier = $step/100
         
